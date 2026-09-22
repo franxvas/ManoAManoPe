@@ -56,8 +56,8 @@ insert into public.listings (id, owner_id, category_id, type, title, description
 on conflict (id) do nothing;
 
 insert into public.listing_media (listing_id, storage_path, public_url, sort_order) values
-  ('30000000-0000-4000-8000-000000000001', 'demo/laptop.jpg', 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&auto=format&fit=crop', 0),
-  ('30000000-0000-4000-8000-000000000002', 'demo/carpinteria.jpg', 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=900&auto=format&fit=crop', 0),
-  ('30000000-0000-4000-8000-000000000003', 'demo/polleria.jpg', 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=900&auto=format&fit=crop', 0),
-  ('30000000-0000-4000-8000-000000000004', 'demo/ropa.jpg', 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=900&auto=format&fit=crop', 0)
+  ('30000000-0000-4000-8000-000000000001', '22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000001/cover.jpg', 'https://wvxnzvatfewbktdrxacw.supabase.co/storage/v1/object/public/listing-media/22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000001/cover.jpg', 0),
+  ('30000000-0000-4000-8000-000000000002', '22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000002/cover.jpg', 'https://wvxnzvatfewbktdrxacw.supabase.co/storage/v1/object/public/listing-media/22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000002/cover.jpg', 0),
+  ('30000000-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000003/cover.jpg', 'https://wvxnzvatfewbktdrxacw.supabase.co/storage/v1/object/public/listing-media/22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000003/cover.jpg', 0),
+  ('30000000-0000-4000-8000-000000000004', '22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000004/cover.jpg', 'https://wvxnzvatfewbktdrxacw.supabase.co/storage/v1/object/public/listing-media/22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000004/cover.jpg', 0)
 on conflict (storage_path) do nothing;
