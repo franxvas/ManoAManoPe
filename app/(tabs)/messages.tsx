@@ -9,6 +9,7 @@ import { Avatar } from '@/components/avatar';
 import { EmptyState } from '@/components/empty-state';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
+import { PrimaryButton } from '@/components/primary-button';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { fetchRemoteConversations, removeRealtimeChannel, subscribeToConversationList } from '@/services/social';
 import { useAppStore } from '@/stores/app-store';
@@ -19,14 +20,15 @@ const statusLabels = { chatting: 'Conversando', negotiating: 'Negociando', offer
 export default function MessagesScreen() {
   const localConversations = useAppStore((state) => state.conversations);
   const queryClient = useQueryClient();
-  const { session } = useAuth();
-  const remote = useQuery({ queryKey: ['conversations'], queryFn: fetchRemoteConversations, enabled: isSupabaseConfigured, refetchInterval: 30_000 });
+  const { session, isAuthenticated } = useAuth();
+  const remote = useQuery({ queryKey: ['conversations'], queryFn: fetchRemoteConversations, enabled: isSupabaseConfigured && Boolean(session), refetchInterval: 30_000 });
   const conversations = [...(isSupabaseConfigured ? (remote.data ?? []) : localConversations)].sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
   useEffect(() => {
     if (!isSupabaseConfigured || !session) return;
     const channel = subscribeToConversationList(() => void queryClient.invalidateQueries({ queryKey: ['conversations'] }));
     return () => { void removeRealtimeChannel(channel); };
   }, [queryClient, session]);
+  if (!isAuthenticated) return <SafeAreaView className="flex-1 justify-center bg-canvas px-6"><EmptyState icon="chatbubbles-outline" title="Inicia sesión para conversar" description="Tus mensajes y ofertas aparecerán aquí cuando ingreses a tu cuenta." /><PrimaryButton label="Iniciar sesión" onPress={() => router.push({ pathname: '/(auth)/login', params: { returnTo: '/(tabs)/messages' } })} /></SafeAreaView>;
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
       <View className="bg-white px-5 pb-5 pt-3">

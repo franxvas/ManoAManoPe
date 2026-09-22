@@ -16,6 +16,16 @@ export async function fetchProfile(): Promise<Profile | null> {
   return mapProfile(data as ProfileRow);
 }
 
+export async function fetchPublicProfile(profileId: string): Promise<Profile | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.from('profiles')
+    .select('id,display_name,avatar_url,cover_url,profession,bio,phone,city,region,seller_mode,verified,rating_average,rating_count,service_area,availability')
+    .eq('id', profileId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapProfile(data as ProfileRow) : null;
+}
+
 export async function updateRemoteProfile(changes: Partial<Profile>) {
   if (!supabase) throw new Error('Supabase no está configurado');
   const { data: auth } = await supabase.auth.getUser();

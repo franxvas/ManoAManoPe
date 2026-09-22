@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { Image } from 'expo-image';
@@ -12,12 +12,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { Avatar } from '@/components/avatar';
+import { EmptyState } from '@/components/empty-state';
 import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { demoCategories } from '@/constants/demo';
 import { colors, listingLabels } from '@/constants/theme';
 import { useDeviceLocation, type DeviceCoordinates } from '@/features/location/location-provider';
+import { useAuth } from '@/features/auth/auth-provider';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useProfile } from '@/hooks/use-profile';
 import { createRemoteListing, fetchCategories, fetchListing, updateRemoteListing, type ListingWriteInput } from '@/services/listings';
@@ -33,15 +35,21 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 export default function PublishFormScreen() {
-  const { type: rawType, listingId } = useLocalSearchParams<{ type: ListingType; listingId?: string }>();
-  const type: ListingType = ['product', 'service', 'promotion', 'need'].includes(rawType) ? rawType : 'product';
+  const { type: rawType, listingId } = useLocalSearchParams<{ type?: string; listingId?: string }>();
+  const { isAuthenticated } = useAuth();
+  const validType = rawType && ['product', 'service', 'promotion', 'need'].includes(rawType);
+  const type = validType ? rawType as ListingType : null;
   const localExisting = useAppStore((state) => state.listings.find((item) => item.id === listingId));
   const remoteExisting = useQuery({ queryKey: ['listing', listingId], queryFn: () => fetchListing(listingId!), enabled: isSupabaseConfigured && Boolean(listingId) });
+  if (!isAuthenticated) return <SafeAreaView edges={['top']} className="flex-1 bg-canvas"><ScreenHeader title="Publicar" showBack /><View className="flex-1 justify-center px-6"><EmptyState icon="lock-closed-outline" title="Inicia sesión para publicar" description="Necesitas una cuenta para crear o editar publicaciones." /><PrimaryButton label="Iniciar sesión" onPress={() => router.replace({ pathname: '/(auth)/login', params: { returnTo: '/(tabs)/publish' } })} /></View></SafeAreaView>;
+  if (!type) return <SafeAreaView edges={['top']} className="flex-1 bg-canvas"><ScreenHeader title="Publicar" showBack /><EmptyState icon="alert-circle-outline" title="Tipo de publicación inválido" description="Vuelve a elegir qué deseas publicar." /></SafeAreaView>;
   if (isSupabaseConfigured && listingId && remoteExisting.isLoading) return <SafeAreaView className="flex-1 items-center justify-center bg-canvas"><Text className="font-medium text-navy">Cargando publicación…</Text></SafeAreaView>;
+  if (listingId && (remoteExisting.isError || (isSupabaseConfigured ? remoteExisting.data === null : !localExisting))) return <SafeAreaView edges={['top']} className="flex-1 bg-canvas"><ScreenHeader title="Editar publicación" showBack backFallback="/(tabs)/profile" /><EmptyState icon="alert-circle-outline" title="Publicación no disponible" description="No se encontró o ya no tienes acceso para editarla." /></SafeAreaView>;
   return <PublishFormContent type={type} existing={isSupabaseConfigured ? (remoteExisting.data ?? undefined) : localExisting} />;
 }
 
 function PublishFormContent({ type, existing }: { type: ListingType; existing?: Listing }) {
+  const queryClient = useQueryClient();
   const localProfile = useAppStore((state) => state.profile);
   const { profile: remoteProfile } = useProfile();
   const profile = remoteProfile ?? localProfile;
@@ -120,11 +128,15 @@ function PublishFormContent({ type, existing }: { type: ListingType; existing?: 
 
   const submit = handleSubmit(async (values) => {
     setSubmitError('');
+    if (photos.length === 0) return setSubmitError('Añade al menos una foto para la publicación.');
+    if (remoteCategories.isError || categories.length === 0) return setSubmitError('No pudimos cargar las categorías. Revisa tu conexión e inténtalo otra vez.');
     if (type !== 'need' && !values.price) return setSubmitError('Ingresa un precio para publicar.');
     if (type === 'promotion' && !values.originalPrice) return setSubmitError('Ingresa el precio normal de la promoción.');
     const parsedPrice = values.price ? Number(values.price.replace(',', '.')) : undefined;
     const parsedOriginal = values.originalPrice ? Number(values.originalPrice.replace(',', '.')) : undefined;
     if ((parsedPrice != null && (!Number.isFinite(parsedPrice) || parsedPrice < 0)) || (parsedOriginal != null && (!Number.isFinite(parsedOriginal) || parsedOriginal < 0))) return setSubmitError('Revisa los montos ingresados.');
+    if (type === 'promotion' && parsedPrice != null && parsedOriginal != null && parsedOriginal < parsedPrice) return setSubmitError('El precio normal debe ser mayor o igual al precio promocional.');
+    if (type === 'promotion' && values.validUntil && !/^\d{4}-\d{2}-\d{2}$/.test(values.validUntil)) return setSubmitError('Escribe la vigencia con el formato AAAA-MM-DD.');
     const currentCoordinates = existing ? listingCoordinates : await requestLocation();
     if (!currentCoordinates) return setSubmitError('No se puede publicar sin una ubicación real. Activa el permiso de ubicación e inténtalo otra vez.');
     setListingCoordinates(currentCoordinates);
@@ -140,10 +152,12 @@ function PublishFormContent({ type, existing }: { type: ListingType; existing?: 
       if (existing) {
         if (isSupabaseConfigured) await updateRemoteListing(existing.id, write, photos);
         else updateListing(existing.id, { ...write, currency: 'PEN', images: photos });
+        await Promise.all([queryClient.invalidateQueries({ queryKey: ['listing', existing.id] }), queryClient.invalidateQueries({ queryKey: ['listings'] }), queryClient.invalidateQueries({ queryKey: ['my-listings'] })]);
         router.replace('/profile/my-listings');
       } else if (isSupabaseConfigured) {
         setProgress('Subiendo fotos y guardando publicación...');
         const id = await createRemoteListing(write, photos);
+        await Promise.all([queryClient.invalidateQueries({ queryKey: ['listings'] }), queryClient.invalidateQueries({ queryKey: ['my-listings'] })]);
         router.replace({ pathname: '/listing/[id]', params: { id } });
       } else {
         const listing = addListing({ ...write, currency: 'PEN', images: photos });
@@ -192,8 +206,8 @@ function PublishFormContent({ type, existing }: { type: ListingType; existing?: 
             {type === 'service' && <><Controller control={control} name="serviceArea" render={({ field }) => <FormField label="Zona de atención" value={field.value} onChangeText={field.onChange} />} /><Controller control={control} name="availability" render={({ field }) => <FormField label="Disponibilidad" value={field.value} onChangeText={field.onChange} />} /><Controller control={control} name="homeService" render={({ field }) => <Toggle label="Atención a domicilio" value={field.value} onValueChange={field.onChange} />} /></>}
             {(type === 'product' || type === 'promotion') && <Controller control={control} name="shippingAvailable" render={({ field }) => <Toggle label="Envío disponible" value={field.value} onValueChange={field.onChange} />} />}
           </Section>
-          {submitError && <Text className="mb-4 rounded-xl bg-red-50 p-3 font-sans text-sm text-brand">{submitError}</Text>}
-          {progress && <Text className="mb-3 text-center font-medium text-sm text-navy">{progress}</Text>}
+          {Boolean(submitError) && <Text className="mb-4 rounded-xl bg-red-50 p-3 font-sans text-sm text-brand">{submitError}</Text>}
+          {Boolean(progress) && <Text className="mb-3 text-center font-medium text-sm text-navy">{progress}</Text>}
           <PrimaryButton label={existing ? 'Guardar cambios' : `Publicar ${listingLabels[type]}`} loading={isSubmitting} onPress={submit} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -202,7 +216,7 @@ function PublishFormContent({ type, existing }: { type: ListingType; existing?: 
 }
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
-  return <View className="mb-5 rounded-3xl bg-white p-5"><View className="mb-4"><Text className="font-display text-xl text-navy">{title}</Text>{subtitle && <Text className="mt-1 font-sans text-xs text-muted">{subtitle}</Text>}</View>{children}</View>;
+  return <View className="mb-5 rounded-3xl bg-white p-5"><View className="mb-4"><Text className="font-display text-xl text-navy">{title}</Text>{Boolean(subtitle) && <Text className="mt-1 font-sans text-xs text-muted">{subtitle}</Text>}</View>{children}</View>;
 }
 
 function Toggle({ label, value, onValueChange }: { label: string; value: boolean; onValueChange: (value: boolean) => void }) {

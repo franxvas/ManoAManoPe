@@ -18,5 +18,5 @@ export function useProfile() {
       await queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
     } else updateLocalProfile(changes);
   };
-  return { profile: isSupabaseConfigured ? remote.data : localProfile, isLoading: remote.isLoading, updateProfile };
+  return { profile: isSupabaseConfigured ? remote.data : localProfile, isLoading: remote.isLoading, isError: remote.isError, refresh: remote.refetch, updateProfile };
 }

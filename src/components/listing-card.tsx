@@ -1,15 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import { colors, listingLabels } from '@/constants/theme';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useProtectedAction } from '@/hooks/use-protected-action';
 import type { Listing } from '@/types/domain';
 import { formatMoney, getListingAmount } from '@/utils/format';
 
 export function ListingCard({ listing, horizontal = false }: { listing: Listing; horizontal?: boolean }) {
   const { favorites, toggleFavorite } = useFavorites();
+  const protect = useProtectedAction();
   const favorite = favorites.includes(listing.id);
   const image = listing.images[0];
 
@@ -25,7 +27,7 @@ export function ListingCard({ listing, horizontal = false }: { listing: Listing;
           <Text className="font-medium text-[10px] uppercase tracking-wide text-white">{listingLabels[listing.type]}</Text>
         </View>
         <Pressable
-          onPress={(event) => { event.stopPropagation(); void toggleFavorite(listing.id); }}
+          onPress={(event) => { event.stopPropagation(); protect(() => { void toggleFavorite(listing.id).catch(() => Alert.alert('Favoritos', 'No se pudo actualizar el favorito. Inténtalo otra vez.')); }, `/listing/${listing.id}`); }}
           className="absolute right-3 top-3 h-9 w-9 items-center justify-center rounded-full bg-white/95"
           accessibilityLabel={favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >

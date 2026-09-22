@@ -7,8 +7,9 @@ import { BrandLogo } from '@/components/brand-logo';
 import { colors } from '@/constants/theme';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useProfile } from '@/hooks/use-profile';
+import { goBackOr } from '@/utils/navigation';
 
-export function ScreenHeader({ title, showBack = false }: { title?: string; showBack?: boolean }) {
+export function ScreenHeader({ title, showBack = false, backFallback = '/(tabs)' }: { title?: string; showBack?: boolean; backFallback?: '/(tabs)' | '/(tabs)/profile' | '/(tabs)/messages' | '/(auth)/welcome' }) {
   const { profile } = useProfile();
   const { notifications } = useNotifications();
   const unread = notifications.filter((item) => !item.read).length;
@@ -16,7 +17,7 @@ export function ScreenHeader({ title, showBack = false }: { title?: string; show
     <View className="flex-row items-center justify-between bg-white px-5 pb-3 pt-2">
       <View className="flex-row items-center">
         {showBack && (
-          <Pressable onPress={() => router.back()} className="mr-3 h-11 w-11 items-center justify-center rounded-full bg-canvas" accessibilityLabel="Volver">
+          <Pressable onPress={() => goBackOr(backFallback)} className="mr-3 h-11 w-11 items-center justify-center rounded-full bg-canvas" accessibilityLabel="Volver">
             <Ionicons name="arrow-back" size={23} color={colors.navy} />
           </Pressable>
         )}

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,7 +51,7 @@ export default function HomeScreen() {
           {quickLinks.map((item) => {
             const active = item.type === type && item.type !== undefined;
             return (
-              <Pressable key={item.label} onPress={() => setType(active ? undefined : item.type)} className="items-center">
+              <Pressable key={item.label} onPress={() => item.type ? setType(active ? undefined : item.type) : router.push('/(tabs)/explore')} className="items-center" accessibilityRole="button" accessibilityLabel={item.label}>
                 <View className={`h-14 w-14 items-center justify-center rounded-2xl ${active ? 'bg-brand' : 'bg-white'}`}>
                   <Ionicons name={item.icon} size={25} color={active ? colors.white : colors.navy} />
                 </View>
@@ -68,7 +69,7 @@ export default function HomeScreen() {
           <>
             <View className="mb-3 flex-row items-end justify-between px-5">
               <View><Text className="font-display text-2xl text-navy">Explora por tu zona</Text><Text className="mt-1 font-sans text-sm text-muted">Opciones destacadas en Bagua</Text></View>
-              <Text className="font-medium text-sm text-brand">Ver todo</Text>
+              <Pressable onPress={() => router.push('/(tabs)/explore')} hitSlop={10}><Text className="font-medium text-sm text-brand">Ver todo</Text></Pressable>
             </View>
             <FlatList horizontal data={featured} keyExtractor={(item) => item.id} renderItem={({ item }) => <ListingCard listing={item} horizontal />} showsHorizontalScrollIndicator={false} contentContainerClassName="px-5" />
             <Text className="mb-3 mt-7 px-5 font-display text-2xl text-navy">Recomendados cerca de ti</Text>

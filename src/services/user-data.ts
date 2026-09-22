@@ -45,7 +45,8 @@ export async function markAllRemoteNotificationsRead() {
 
 export function subscribeToNotifications(userId: string, onChange: () => void): RealtimeChannel | null {
   if (!supabase) return null;
-  return supabase.channel(`notifications:${userId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, onChange).subscribe();
+  const instanceId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return supabase.channel(`notifications:${userId}:${instanceId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, onChange).subscribe();
 }
 
 export async function removeNotificationChannel(channel: RealtimeChannel | null) {

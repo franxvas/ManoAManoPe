@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
@@ -17,6 +17,7 @@ import { fetchRemoteConversation, fetchRemoteMessages, markRemoteMessagesRead, r
 import { useAppStore } from '@/stores/app-store';
 import type { Offer } from '@/types/domain';
 import { formatMoney, getListingAmount } from '@/utils/format';
+import { goBackOr } from '@/utils/navigation';
 
 export default function ConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,20 +58,21 @@ export default function ConversationScreen() {
     if (isSupabaseConfigured && remoteMessages.data) void markRemoteMessagesRead(id).catch(() => undefined);
   }, [id, remoteMessages.data]);
 
-  if (!conversation || !listing) return <SafeAreaView className="flex-1 bg-canvas"><EmptyState icon="chatbubble-ellipses-outline" title="Conversación no disponible" description="No pudimos encontrar esta conversación." /></SafeAreaView>;
+  if (remoteConversation.isLoading || remoteMessages.isLoading) return <SafeAreaView className="flex-1 items-center justify-center bg-canvas"><ActivityIndicator color={colors.red} /><Text className="mt-3 text-muted">Cargando conversación…</Text></SafeAreaView>;
+  if (!conversation || !listing || remoteConversation.isError || remoteMessages.isError) return <SafeAreaView edges={['top']} className="flex-1 bg-canvas"><View className="px-4 py-3"><Pressable onPress={() => goBackOr('/(tabs)/messages')} className="h-10 w-10 items-center justify-center"><Ionicons name="arrow-back" size={24} color={colors.navy} /></Pressable></View><EmptyState icon="chatbubble-ellipses-outline" title="Conversación no disponible" description="No pudimos encontrar esta conversación." /></SafeAreaView>;
   const submitText = async () => { const value = body.trim(); if (!value) return; try { if (isSupabaseConfigured) { await sendRemoteMessage(id, value); await queryClient.invalidateQueries({ queryKey: ['conversation-messages', id] }); } else sendMessage(id, value); setBody(''); } catch (error) { setActionError(error instanceof Error ? error.message : 'No se pudo enviar el mensaje.'); } };
   const openOffer = (parent?: Offer) => { setCounterParent(parent?.id); setAmount(parent ? String(Math.round(parent.amount * 1.05)) : String(getListingAmount(listing.price, listing.budget) ?? '')); setOfferVisible(true); };
-  const submitOffer = async () => { const value = Number(amount.replace(',', '.')); if (!Number.isFinite(value) || value <= 0) return; try { if (isSupabaseConfigured) { await sendRemoteOffer(id, value, counterParent); await queryClient.invalidateQueries({ queryKey: ['conversation-messages', id] }); } else sendOffer(id, listing.id, value, counterParent); setOfferVisible(false); } catch (error) { setActionError(error instanceof Error ? error.message : 'No se pudo enviar la oferta.'); } };
+  const submitOffer = async () => { const value = Number(amount.replace(',', '.')); if (!Number.isFinite(value) || value <= 0) return setActionError('Ingresa un monto válido para la oferta.'); try { if (isSupabaseConfigured) { await sendRemoteOffer(id, value, counterParent); await queryClient.invalidateQueries({ queryKey: ['conversation-messages', id] }); } else sendOffer(id, listing.id, value, counterParent); setOfferVisible(false); setCounterParent(undefined); } catch (error) { setActionError(error instanceof Error ? error.message : 'No se pudo enviar la oferta.'); } };
   const resolve = async (offer: Offer, action: 'accepted' | 'rejected') => { try { if (isSupabaseConfigured) { await respondRemoteOffer(offer.id, action === 'accepted' ? 'accept' : 'reject'); await queryClient.invalidateQueries({ queryKey: ['conversation-messages', id] }); } else resolveOffer(offer.id, action); } catch (error) { setActionError(error instanceof Error ? error.message : 'La oferta ya no puede modificarse.'); } };
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
       <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
         <View className="flex-row items-center border-b border-line bg-white px-4 py-3">
-          <Pressable onPress={() => router.back()} className="mr-3 h-10 w-10 items-center justify-center"><Ionicons name="arrow-back" size={24} color={colors.navy} /></Pressable>
+          <Pressable onPress={() => goBackOr('/(tabs)/messages')} className="mr-3 h-10 w-10 items-center justify-center"><Ionicons name="arrow-back" size={24} color={colors.navy} /></Pressable>
           <Avatar uri={conversation.participantAvatar} name={conversation.participantName} size={43} />
           <View className="ml-3 flex-1"><Text className="font-display text-lg text-navy">{conversation.participantName}</Text><Text className="font-sans text-[11px] text-success">Activo recientemente</Text></View>
-          <Ionicons name="ellipsis-vertical" size={22} color={colors.navy} />
+          <Pressable onPress={() => Alert.alert('Conversación', undefined, [{ text: 'Ver publicación', onPress: () => router.push({ pathname: '/listing/[id]', params: { id: listing.id } }) }, { text: 'Cancelar', style: 'cancel' }])} className="h-10 w-10 items-center justify-center" accessibilityLabel="Opciones de conversación"><Ionicons name="ellipsis-vertical" size={22} color={colors.navy} /></Pressable>
         </View>
         <Pressable onPress={() => router.push({ pathname: '/listing/[id]', params: { id: listing.id } })} className="mx-4 mt-3 flex-row items-center rounded-2xl border border-line bg-white p-3">
           <View className="h-11 w-11 items-center justify-center rounded-xl bg-red-50"><Ionicons name="pricetag-outline" size={21} color={colors.red} /></View>
@@ -88,11 +90,11 @@ export default function ConversationScreen() {
             return <View key={message.id} className={`max-w-[82%] rounded-2xl px-4 py-3 ${mine ? 'self-end rounded-br-sm bg-navy' : 'self-start rounded-bl-sm bg-white'}`}><Text className={`font-sans text-[15px] leading-5 ${mine ? 'text-white' : 'text-ink'}`}>{message.body}</Text><Text className={`mt-1 self-end font-sans text-[9px] ${mine ? 'text-white/60' : 'text-muted'}`}>{format(new Date(message.createdAt), 'HH:mm')}</Text></View>;
           })}
         </ScrollView>
-        {actionError && <Pressable onPress={() => setActionError('')} className="mx-4 mb-2 rounded-xl bg-red-50 p-3"><Text className="text-center text-xs text-brand">{actionError}</Text></Pressable>}
+        {Boolean(actionError) && <Pressable onPress={() => setActionError('')} className="mx-4 mb-2 rounded-xl bg-red-50 p-3"><Text className="text-center text-xs text-brand">{actionError}</Text></Pressable>}
         <View className="flex-row items-end gap-2 border-t border-line bg-white px-3 py-3">
           <Pressable onPress={() => openOffer()} className="h-11 w-11 items-center justify-center rounded-full bg-red-50" accessibilityLabel="Hacer oferta"><Ionicons name="pricetag" size={21} color={colors.red} /></Pressable>
           <View className="min-h-11 flex-1 flex-row items-center rounded-2xl bg-canvas px-4"><TextInput value={body} onChangeText={setBody} placeholder="Escribe un mensaje..." placeholderTextColor={colors.muted} multiline className="max-h-24 flex-1 py-3 font-sans text-[15px] text-ink" /></View>
-          <Pressable onPress={() => void submitText()} className="h-11 w-11 items-center justify-center rounded-full bg-brand" accessibilityLabel="Enviar mensaje"><Ionicons name="send" size={19} color="white" /></Pressable>
+          <Pressable disabled={!body.trim()} onPress={() => void submitText()} className={`h-11 w-11 items-center justify-center rounded-full bg-brand ${body.trim() ? '' : 'opacity-40'}`} accessibilityLabel="Enviar mensaje"><Ionicons name="send" size={19} color="white" /></Pressable>
         </View>
       </KeyboardAvoidingView>
       <Modal visible={offerVisible} transparent animationType="slide" onRequestClose={() => setOfferVisible(false)}>

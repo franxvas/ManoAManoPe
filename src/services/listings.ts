@@ -72,6 +72,13 @@ export async function fetchMyListings(): Promise<Listing[]> {
   return (data ?? []).map(mapListingRow);
 }
 
+export async function fetchListingsByOwner(ownerId: string): Promise<Listing[]> {
+  if (!supabase) return demoListings.filter((listing) => listing.ownerId === ownerId && listing.status === 'published');
+  const { data, error } = await supabase.from('listing_feed').select('*').eq('owner_id', ownerId).eq('status', 'published').order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(mapListingRow);
+}
+
 export async function fetchCategories(): Promise<Category[]> {
   if (!supabase) return demoCategories;
   const { data, error } = await supabase.from('categories').select('id,name,type,icon').eq('active', true).order('sort_order');
@@ -185,6 +192,13 @@ export async function updateRemoteListing(listingId: string, input: ListingWrite
 
 export async function deleteRemoteListing(listingId: string) {
   if (!supabase) throw new Error('Supabase no está configurado');
+  const { data: media, error: mediaError } = await supabase.from('listing_media').select('storage_path').eq('listing_id', listingId);
+  if (mediaError) throw mediaError;
+  const paths = (media ?? []).map((item) => String(item.storage_path));
+  if (paths.length) {
+    const { error: storageError } = await supabase.storage.from('listing-media').remove(paths);
+    if (storageError) throw storageError;
+  }
   const { error } = await supabase.from('listings').delete().eq('id', listingId);
   if (error) throw error;
 }

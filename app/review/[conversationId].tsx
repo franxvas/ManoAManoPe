@@ -36,7 +36,7 @@ export default function ReviewScreen() {
           <Text className="text-center font-display text-2xl text-navy">¿Cómo fue tu experiencia?</Text><Text className="mt-2 text-center font-sans text-sm text-muted">Tu reseña ayuda a construir una comunidad confiable.</Text>
           <View className="my-8 flex-row justify-center gap-2">{[1, 2, 3, 4, 5].map((star) => <Pressable key={star} onPress={() => setRating(star)} className="p-1" accessibilityLabel={`${star} estrellas`}><Ionicons name={star <= rating ? 'star' : 'star-outline'} size={38} color={colors.rating} /></Pressable>)}</View>
           <TextInput value={comment} onChangeText={setComment} multiline maxLength={1000} placeholder="Cuéntanos más (opcional)" placeholderTextColor={colors.muted} className="mb-5 min-h-32 rounded-2xl border border-line p-4 font-sans text-ink" textAlignVertical="top" />
-          {error && <Text className="mb-4 text-sm text-brand">{error}</Text>}<PrimaryButton label="Publicar reseña" loading={loading} onPress={() => void submit()} />
+          {Boolean(error) && <Text className="mb-4 text-sm text-brand">{error}</Text>}<PrimaryButton label="Publicar reseña" loading={loading} onPress={() => void submit()} />
         </>}
       </View>
     </SafeAreaView>

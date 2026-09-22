@@ -9,6 +9,7 @@ import { BrandLogo } from '@/components/brand-logo';
 import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
 import { useAuth } from '@/features/auth/auth-provider';
+import { goBackOr } from '@/utils/navigation';
 
 const schema = z.object({ email: z.string().email('Ingresa un correo válido'), password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres') });
 type FormValues = z.infer<typeof schema>;
@@ -33,7 +34,7 @@ export default function LoginScreen() {
     <SafeAreaView className="flex-1 bg-canvas">
       <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerClassName="flex-grow px-6 pb-8 pt-5" keyboardShouldPersistTaps="handled">
-          <Pressable onPress={() => router.back()}><Text className="font-medium text-navy">← Volver</Text></Pressable>
+          <Pressable onPress={() => goBackOr('/(auth)/welcome')}><Text className="font-medium text-navy">← Volver</Text></Pressable>
           <View className="mt-10"><BrandLogo /></View>
           <Text className="mt-10 font-display text-3xl text-navy">Qué bueno verte</Text>
           <Text className="mb-8 mt-2 font-sans text-base text-muted">Ingresa para publicar, negociar y conversar.</Text>

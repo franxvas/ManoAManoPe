@@ -13,7 +13,7 @@ export function FormField({ label, error, multiline, ...props }: TextInputProps 
         textAlignVertical={multiline ? 'top' : 'center'}
         className={`rounded-2xl border bg-white px-4 font-sans text-base text-ink ${multiline ? 'min-h-28 py-4' : 'h-14'} ${error ? 'border-brand' : 'border-line'}`}
       />
-      {error && <Text className="mt-1.5 font-sans text-xs text-brand">{error}</Text>}
+      {Boolean(error) && <Text className="mt-1.5 font-sans text-xs text-brand">{error}</Text>}
     </View>
   );
 }

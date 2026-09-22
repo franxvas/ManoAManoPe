@@ -7,11 +7,16 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useNotifications } from '@/hooks/use-notifications';
 import { formatRelativeDate } from '@/utils/format';
+import { PrimaryButton } from '@/components/primary-button';
+import { useAuth } from '@/features/auth/auth-provider';
+import { router } from 'expo-router';
 
 const icons = { message: 'chatbubble-outline', offer: 'pricetag-outline', offer_accepted: 'checkmark-circle-outline', offer_rejected: 'close-circle-outline', counteroffer: 'swap-horizontal-outline', review: 'star-outline', listing: 'megaphone-outline' } as const;
 
 export default function NotificationsScreen() {
+  const { isAuthenticated } = useAuth();
   const { notifications, markRead, markAllRead } = useNotifications();
+  if (!isAuthenticated) return <SafeAreaView edges={['top']} className="flex-1 bg-canvas"><ScreenHeader title="Notificaciones" showBack /><View className="flex-1 justify-center px-6"><EmptyState icon="notifications-outline" title="Inicia sesión para ver tus avisos" description="Aquí aparecerán mensajes, ofertas y novedades de tu cuenta." /><PrimaryButton label="Iniciar sesión" onPress={() => router.push({ pathname: '/(auth)/login', params: { returnTo: '/notifications' } })} /></View></SafeAreaView>;
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
       <ScreenHeader title="Notificaciones" showBack />

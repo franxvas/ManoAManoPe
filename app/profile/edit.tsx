@@ -70,7 +70,7 @@ function EditProfileForm({ profile, updateProfile }: { profile: Profile; updateP
           <View className="flex-row gap-3"><View className="flex-1"><Controller control={control} name="city" render={({ field }) => <FormField label="Ciudad" value={field.value} onChangeText={field.onChange} error={errors.city?.message} />}/></View><View className="flex-1"><Controller control={control} name="region" render={({ field }) => <FormField label="Región" value={field.value} onChangeText={field.onChange} error={errors.region?.message} />}/></View></View>
           <Controller control={control} name="serviceArea" render={({ field }) => <FormField label="Zona de atención" value={field.value} onChangeText={field.onChange} />} />
           <Controller control={control} name="availability" render={({ field }) => <FormField label="Disponibilidad" value={field.value} onChangeText={field.onChange} />} />
-          {submitError && <Text className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-brand">{submitError}</Text>}
+          {Boolean(submitError) && <Text className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-brand">{submitError}</Text>}
           <PrimaryButton label="Guardar cambios" loading={isSubmitting} onPress={submit} />
         </ScrollView>
       </KeyboardAvoidingView>
