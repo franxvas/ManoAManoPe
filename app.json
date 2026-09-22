@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "MANO A MANO.PE",
+    "slug": "mano-a-mano-pe",
+    "scheme": "manoamano",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "pe.manoamano.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Tu ubicación permite mostrar publicaciones cercanas.",
+        "NSPhotoLibraryUsageDescription": "Tus fotos se usan en las publicaciones que decides crear.",
+        "NSCameraUsageDescription": "La cámara permite añadir fotos a tus publicaciones."
+      }
+    },
+    "android": {
+      "package": "pe.manoamano.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      "expo-secure-store",
+      "expo-font",
+      ["expo-splash-screen", { "image": "./assets/splash-icon.png", "imageWidth": 180, "resizeMode": "contain", "backgroundColor": "#FFFFFF" }],
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Permite que MANO A MANO.PE use tu ubicación para mostrar opciones cercanas."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite seleccionar fotos para tus publicaciones.",
+          "cameraPermission": "Permite tomar fotos para tus publicaciones."
+        }
+      ],
+      "expo-splash-screen"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
