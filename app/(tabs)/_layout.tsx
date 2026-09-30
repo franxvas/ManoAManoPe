@@ -25,10 +25,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="publish"
         options={{
-          title: 'Publicar',
-          tabBarLabelStyle: { marginBottom: 4, fontFamily: 'Inter_600SemiBold', fontSize: 11 },
+          title: '', // Dejamos el título vacío para que el botón flotante no arrastre texto debajo
+          tabBarLabel: () => null, // Oculta por completo la etiqueta de texto en la barra inferior solo para esta pestaña
           tabBarItemStyle: { top: -20 },
-          tabBarIcon: () => <View className="h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-brand shadow-lg"><Ionicons name="add" size={32} color="white" /></View>,
+          tabBarIcon: () => (
+            <View className="h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-brand shadow-lg">
+              <Ionicons name="add" size={32} color="white" />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen name="messages" options={{ title: 'Mensajes' }} />
