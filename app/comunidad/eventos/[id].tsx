@@ -14,6 +14,7 @@ import { useAuth } from '@/features/auth/auth-provider';
 import { photoUrl } from '@/features/comunidad/api';
 import { InfoRow, StatusBadge } from '@/features/comunidad/components';
 import { dayTitle } from '@/features/comunidad/event-components';
+import { RegistrationPanel } from '@/features/comunidad/event-registration';
 import { categoryLabels, dayKey, eventPhase, phaseBadges, timeText } from '@/features/comunidad/event-model';
 import { deleteEvent, fetchEvent, fetchSavedEventIds, toggleSavedEvent } from '@/features/comunidad/events';
 import { useCommunityAction } from '@/features/comunidad/use-action';
@@ -87,6 +88,7 @@ export default function EventDetail() {
           </View>
           {Boolean(action.error) && <Text accessibilityRole="alert" className="mt-3 font-sans text-sm text-brand">{action.error}</Text>}
         </View>
+        <RegistrationPanel event={event} userId={session?.user.id} />
         {isOrganizer && (
           <View className="mt-3 gap-3 bg-white p-5">
             <PrimaryButton variant="outline" label="Editar evento" onPress={() => router.push({ pathname: '/comunidad/eventos/nuevo', params: { id: event.id } })} />

@@ -11,10 +11,11 @@ import { colors } from '@/constants/theme';
 import { photoUrl } from '@/features/comunidad/api';
 import { ChoiceChips, PhotoPicker, type Photo } from '@/features/comunidad/components';
 import { DayStrip, nextDays } from '@/features/comunidad/event-components';
-import { categoryLabels, dayKey, timeText, validateEvent, type CommunityEvent } from '@/features/comunidad/event-model';
+import { categoryLabels, dayKey, parseCapacity, timeText, validateEvent, type CommunityEvent } from '@/features/comunidad/event-model';
 import { fetchEvent, saveEvent } from '@/features/comunidad/events';
 
 const costOptions = { free: 'Gratuito', paid: 'Tiene un costo' };
+const registrationOptions = { no: 'No, entrada libre', yes: 'Sí, con inscripción' };
 
 export default function EventFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -44,6 +45,8 @@ function EventForm({ id, event }: { id?: string; event?: CommunityEvent }) {
   const [cost, setCost] = useState<keyof typeof costOptions>(event && !event.is_free ? 'paid' : 'free');
   const [costNote, setCostNote] = useState(event?.cost_note ?? '');
   const [requirements, setRequirements] = useState(event?.requirements ?? '');
+  const [registration, setRegistration] = useState<keyof typeof registrationOptions>(event?.requires_registration ? 'yes' : 'no');
+  const [capacity, setCapacity] = useState(event?.capacity ? String(event.capacity) : '');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -52,6 +55,7 @@ function EventForm({ id, event }: { id?: string; event?: CommunityEvent }) {
     try {
       const isFree = cost === 'free';
       const dates = validateEvent({ title, organizerName, description, place, day, startTime, endTime, isFree, costNote });
+      const requiresRegistration = registration === 'yes';
       setBusy(true);
       const savedId = await saveEvent(
         {
@@ -66,6 +70,8 @@ function EventForm({ id, event }: { id?: string; event?: CommunityEvent }) {
           is_free: isFree,
           cost_note: isFree ? '' : costNote.trim(),
           requirements: requirements.trim(),
+          requires_registration: requiresRegistration,
+          capacity: requiresRegistration ? parseCapacity(capacity) : null,
         },
         id,
       );
@@ -101,6 +107,10 @@ function EventForm({ id, event }: { id?: string; event?: CommunityEvent }) {
         <ChoiceChips label="Costo" options={costOptions} value={cost} onChange={setCost} />
         {cost === 'paid' && <FormField label="¿Cuánto cuesta?" value={costNote} onChangeText={setCostNote} maxLength={100} placeholder="Ej. S/ 5 por persona, se paga en el lugar" />}
         <FormField label="Requisitos (opcional)" value={requirements} onChangeText={setRequirements} maxLength={500} multiline placeholder="Ej. Traer DNI, ropa cómoda" />
+        <ChoiceChips label="¿Necesita inscripción?" options={registrationOptions} value={registration} onChange={setRegistration} />
+        {registration === 'yes' && (
+          <FormField label="Capacidad (opcional)" value={capacity} onChangeText={setCapacity} keyboardType="number-pad" maxLength={4} placeholder="Déjalo vacío si no hay límite" />
+        )}
         {Boolean(error) && <Text accessibilityRole="alert" className="mb-3 font-sans text-sm text-brand">{error}</Text>}
         <PrimaryButton label={id ? 'Guardar cambios' : 'Publicar evento'} loading={busy} onPress={() => void submit()} />
       </ScrollView>

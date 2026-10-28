@@ -14,6 +14,9 @@ export interface CommunityEvent {
   is_free: boolean;
   cost_note: string;
   requirements: string;
+  requires_registration: boolean;
+  capacity: number | null;
+  registered_count: number;
 }
 
 export const categoryLabels = {
@@ -67,6 +70,19 @@ export function validateEvent(input: { title: string; organizerName: string; des
   if (end <= now) throw new Error('El evento no puede terminar en el pasado.');
   if (!input.isFree && !input.costNote.trim()) throw new Error('Si tiene costo, indica cuánto o qué se paga.');
   return { start, end };
+}
+
+export function seatsInfo(event: Pick<CommunityEvent, 'capacity' | 'registered_count'>) {
+  if (event.capacity == null) return { full: false, text: `${event.registered_count} ${event.registered_count === 1 ? 'inscrito' : 'inscritos'}` };
+  const left = Math.max(event.capacity - event.registered_count, 0);
+  return { full: left === 0, text: left === 0 ? 'Sin cupos' : `Quedan ${left} de ${event.capacity} cupos` };
+}
+
+export function parseCapacity(value: string) {
+  if (!value.trim()) return null;
+  const capacity = Number(value);
+  if (!Number.isInteger(capacity) || capacity < 1 || capacity > 5000) throw new Error('La capacidad debe ser un número entre 1 y 5000.');
+  return capacity;
 }
 
 export function timeText(date: Date) {

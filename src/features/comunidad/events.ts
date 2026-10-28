@@ -1,7 +1,7 @@
-import { db, uploadPhotos } from './api';
+import { db, rpc, uploadPhotos } from './api';
 import type { CommunityEvent } from './event-model';
 
-export type EventInput = Omit<CommunityEvent, 'id' | 'organizer_id' | 'photo'> & { photo: { uri: string; path?: string } | null };
+export type EventInput = Omit<CommunityEvent, 'id' | 'organizer_id' | 'photo' | 'registered_count'> & { photo: { uri: string; path?: string } | null };
 
 export async function fetchEvents() {
   const { data, error } = await db().from('community_events').select('*').order('starts_at').limit(200);
@@ -34,6 +34,15 @@ export async function fetchSavedEventIds() {
   if (error) throw error;
   return new Set((data ?? []).map((row) => String(row.event_id)));
 }
+
+export async function isRegistered(eventId: string, userId: string) {
+  const { data, error } = await db().from('event_registrations').select('id').eq('event_id', eventId).eq('user_id', userId).eq('status', 'active').maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
+}
+
+export const registerForEvent = (eventId: string) => rpc<string>('register_for_event', { p_event: eventId });
+export const cancelRegistration = (eventId: string) => rpc('cancel_event_registration', { p_event: eventId });
 
 export async function toggleSavedEvent(eventId: string, saved: boolean) {
   const { error } = saved

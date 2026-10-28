@@ -7,7 +7,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { colors } from '@/constants/theme';
 import { photoUrl } from './api';
 import { StatusBadge } from './components';
-import { categoryLabels, dayKey, eventPhase, parseDay, phaseBadges, timeText, type CommunityEvent } from './event-model';
+import { categoryLabels, dayKey, eventPhase, parseDay, phaseBadges, seatsInfo, timeText, type CommunityEvent } from './event-model';
 
 export function nextDays(count: number, from = new Date()) {
   return Array.from({ length: count }, (_, i) => new Date(from.getFullYear(), from.getMonth(), from.getDate() + i));
@@ -54,6 +54,7 @@ export function EventCard({ event, onPress }: { event: CommunityEvent; onPress: 
         <Text className="mt-1 font-sans text-xs text-muted">
           {timeText(start)} – {timeText(new Date(event.ends_at))} · {event.place}
         </Text>
+        {event.requires_registration && <Text className="mt-1 font-medium text-xs text-navy">{seatsInfo(event).text}</Text>}
         <View className="mt-2 flex-row gap-2">
           <StatusBadge label={categoryLabels[event.category]} tone="red" />
           <StatusBadge {...phaseBadges[eventPhase(event)]} />

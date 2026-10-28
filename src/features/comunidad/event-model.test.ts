@@ -1,4 +1,19 @@
-import { eventPhase, joinDateTime, validateEvent } from './event-model';
+import { eventPhase, joinDateTime, parseCapacity, seatsInfo, validateEvent } from './event-model';
+
+describe('cupos', () => {
+  it('muestra cuántos quedan y cuando se llena', () => {
+    expect(seatsInfo({ capacity: 15, registered_count: 11 })).toEqual({ full: false, text: 'Quedan 4 de 15 cupos' });
+    expect(seatsInfo({ capacity: 15, registered_count: 15 })).toEqual({ full: true, text: 'Sin cupos' });
+    expect(seatsInfo({ capacity: null, registered_count: 1 }).text).toBe('1 inscrito');
+  });
+
+  it('acepta capacidad vacía o un número válido', () => {
+    expect(parseCapacity('')).toBeNull();
+    expect(parseCapacity('15')).toBe(15);
+    expect(() => parseCapacity('0')).toThrow();
+    expect(() => parseCapacity('dos')).toThrow();
+  });
+});
 
 const now = new Date(2026, 9, 28, 12, 0);
 
