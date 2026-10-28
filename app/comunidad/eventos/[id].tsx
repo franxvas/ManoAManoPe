@@ -106,6 +106,9 @@ export default function EventDetail() {
         <RegistrationPanel event={event} userId={session?.user.id} />
         {isOrganizer && (
           <View className="mt-3 gap-3 bg-white p-5">
+            {event.requires_registration && (
+              <PrimaryButton variant="secondary" label={`Ver inscritos (${event.registered_count})`} onPress={() => router.push({ pathname: '/comunidad/eventos/inscritos', params: { id: event.id } })} />
+            )}
             <PrimaryButton variant="outline" label={isWorkshop ? 'Editar taller' : 'Editar evento'} onPress={() => router.push({ pathname: '/comunidad/eventos/nuevo', params: { id: event.id } })} />
             <PrimaryButton variant="outline" label={isWorkshop ? 'Eliminar taller' : 'Eliminar evento'} disabled={action.busy} onPress={() => void action.run(() => deleteEvent(event.id)).then((ok) => ok && router.back())} />
           </View>
