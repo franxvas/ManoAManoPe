@@ -7,8 +7,8 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 
 const options: { title: string; description: string; icon: keyof typeof Ionicons.glyphMap; href?: Href }[] = [
-  { title: 'Donaciones', description: 'Regala lo que ya no usas o pide algo que te sirva.', icon: 'gift-outline' },
-  { title: 'Adopciones', description: 'Animales que buscan un hogar responsable.', icon: 'paw-outline' },
+  { title: 'Donaciones', description: 'Regala lo que ya no usas o pide algo que te sirva.', icon: 'gift-outline', href: '/comunidad/donaciones' },
+  { title: 'Adopciones', description: 'Animales que buscan un hogar responsable.', icon: 'paw-outline', href: '/comunidad/adopciones' },
   { title: 'Eventos y campañas', description: 'Ferias, limpiezas, campañas de salud y más.', icon: 'calendar-outline' },
   { title: 'Talleres', description: 'Aprende algo nuevo e inscríbete con tu cupo.', icon: 'school-outline' },
 ];
