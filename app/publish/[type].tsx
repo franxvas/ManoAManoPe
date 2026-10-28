@@ -1274,7 +1274,7 @@ function PublishFormContent({
                     }
                   </Text>
 
-                  <Text className="mt-1 font-medium text-xs text-rating">
+                  {isSupabaseConfigured ? <Text className="mt-1 font-medium text-xs text-rating">
                     ★{' '}
                     {profile.ratingAverage.toFixed(
                       1
@@ -1284,18 +1284,9 @@ function PublishFormContent({
                       profile.ratingCount
                     }{' '}
                     reseñas
-                  </Text>
+                  </Text> : <Text className="mt-1 text-xs text-muted">Modo demostración: sin reputación real</Text>}
                 </View>
 
-                {profile.verified && (
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={21}
-                    color={
-                      colors.navy
-                    }
-                  />
-                )}
               </View>
             </Section>
           )}
@@ -1355,7 +1346,7 @@ function PublishFormContent({
 
                 <Text className="ml-2 flex-1 font-sans text-xs text-green-800">
                   Ubicación
-                  verificada. La
+                  seleccionada. La
                   publicación
                   aparecerá cerca de
                   esta zona.
