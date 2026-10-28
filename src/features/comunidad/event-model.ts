@@ -3,7 +3,7 @@ import type { Tone } from './model';
 export interface CommunityEvent {
   id: string;
   organizer_id: string;
-  category: keyof typeof categoryLabels;
+  category: keyof typeof categoryLabels | 'taller';
   title: string;
   organizer_name: string;
   description: string;
@@ -17,6 +17,13 @@ export interface CommunityEvent {
   requires_registration: boolean;
   capacity: number | null;
   registered_count: number;
+  kind: 'event' | 'workshop';
+  topic: string;
+  instructor: string;
+  level: keyof typeof levelLabels | null;
+  materials: string;
+  modality: keyof typeof modalityLabels | null;
+  registration_deadline: string | null;
 }
 
 export const categoryLabels = {
@@ -26,6 +33,40 @@ export const categoryLabels = {
   salud: 'Salud',
   actividad: 'Actividad',
 };
+
+export const levelLabels = { basico: 'Básico', intermedio: 'Intermedio', avanzado: 'Avanzado' };
+export const modalityLabels = { presencial: 'Presencial', virtual: 'Virtual' };
+
+export function categoryText(event: Pick<CommunityEvent, 'kind' | 'category'>) {
+  return event.category === 'taller' ? 'Taller' : categoryLabels[event.category];
+}
+
+export function durationText(startsAt: string, endsAt: string) {
+  const minutes = Math.round((new Date(endsAt).getTime() - new Date(startsAt).getTime()) / 60000);
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (!hours) return `${rest} min`;
+  return rest ? `${hours} h ${rest} min` : `${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+}
+
+export function registrationClosed(event: Pick<CommunityEvent, 'registration_deadline'>, now = new Date()) {
+  return Boolean(event.registration_deadline && now > new Date(event.registration_deadline));
+}
+
+// Las inscripciones cierran al final del día elegido, o al empezar el taller si es antes.
+export function deadlineFrom(day: string, start: Date) {
+  const endOfDay = parseDay(day, 23, 59);
+  if (!endOfDay) throw new Error('Elige hasta qué día se reciben inscripciones.');
+  if (endOfDay < new Date()) throw new Error('El cierre de inscripción no puede ser en el pasado.');
+  return endOfDay > start ? start : endOfDay;
+}
+
+export function validateWorkshop(input: { topic: string; instructor: string; capacity: string }) {
+  if (input.topic.trim().length < 2) throw new Error('Indica el tema del taller.');
+  if (input.instructor.trim().length < 2) throw new Error('Indica quién dicta el taller.');
+  if (!input.capacity.trim()) throw new Error('Los talleres necesitan un número de cupos.');
+  return parseCapacity(input.capacity);
+}
 
 export type EventPhase = 'upcoming' | 'ongoing' | 'finished';
 

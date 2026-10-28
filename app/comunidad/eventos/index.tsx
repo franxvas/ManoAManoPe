@@ -27,7 +27,7 @@ export default function EventsCalendarScreen() {
   const protect = useProtectedAction();
   const [tab, setTab] = useState<Tab>('upcoming');
   const [day, setDay] = useState<string>();
-  const events = useQuery({ queryKey: ['events'], queryFn: fetchEvents, enabled: isSupabaseConfigured });
+  const events = useQuery({ queryKey: ['events'], queryFn: () => fetchEvents('event'), enabled: isSupabaseConfigured });
   const saved = useQuery({ queryKey: ['event-saves', session?.user.id], queryFn: fetchSavedEventIds, enabled: Boolean(session) });
   const days = useMemo(() => nextDays(21), []);
 

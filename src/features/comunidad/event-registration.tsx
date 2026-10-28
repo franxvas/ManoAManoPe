@@ -3,15 +3,16 @@ import { Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/primary-button';
 import { useProtectedAction } from '@/hooks/use-protected-action';
-import { eventPhase, seatsInfo, type CommunityEvent } from './event-model';
+import { eventPhase, registrationClosed, seatsInfo, type CommunityEvent } from './event-model';
 import { cancelRegistration, isRegistered, registerForEvent } from './events';
 import { useCommunityAction } from './use-action';
 
 export function RegistrationPanel({ event, userId }: { event: CommunityEvent; userId?: string }) {
   const protect = useProtectedAction();
   const registered = useQuery({ queryKey: ['event-registration', event.id, userId], queryFn: () => isRegistered(event.id, userId!), enabled: Boolean(userId) });
-  const action = useCommunityAction([['event-registration', event.id], ['event', event.id], ['events']]);
+  const action = useCommunityAction([['event-registration', event.id], ['event', event.id], ['events'], ['workshops']]);
   const finished = eventPhase(event) === 'finished';
+  const closed = registrationClosed(event);
   const seats = seatsInfo(event);
 
   if (!event.requires_registration) {
@@ -36,6 +37,8 @@ export function RegistrationPanel({ event, userId }: { event: CommunityEvent; us
           <Text className="mt-3 font-sans text-sm text-ink">Ya estás inscrito.</Text>
           <PrimaryButton className="mt-3" variant="outline" label="Cancelar mi inscripción" loading={action.busy} onPress={() => void action.run(() => cancelRegistration(event.id))} />
         </>
+      ) : closed ? (
+        <Text className="mt-3 font-sans text-sm text-muted">Las inscripciones ya cerraron.</Text>
       ) : (
         <PrimaryButton
           className="mt-3"

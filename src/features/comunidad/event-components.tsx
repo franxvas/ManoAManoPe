@@ -7,7 +7,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { colors } from '@/constants/theme';
 import { photoUrl } from './api';
 import { StatusBadge } from './components';
-import { categoryLabels, dayKey, eventPhase, parseDay, phaseBadges, seatsInfo, timeText, type CommunityEvent } from './event-model';
+import { categoryText, dayKey, eventPhase, parseDay, phaseBadges, seatsInfo, timeText, type CommunityEvent } from './event-model';
 
 export function nextDays(count: number, from = new Date()) {
   return Array.from({ length: count }, (_, i) => new Date(from.getFullYear(), from.getMonth(), from.getDate() + i));
@@ -38,7 +38,7 @@ export function DayStrip({ days, selected, marked, onSelect }: { days: Date[]; s
   );
 }
 
-export function EventCard({ event, onPress }: { event: CommunityEvent; onPress: () => void }) {
+export function EventCard({ event, onPress, showDate = false }: { event: CommunityEvent; onPress: () => void; showDate?: boolean }) {
   const start = new Date(event.starts_at);
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={event.title} onPress={onPress} className="flex-row rounded-2xl bg-white p-3">
@@ -52,11 +52,12 @@ export function EventCard({ event, onPress }: { event: CommunityEvent; onPress: 
       <View className="ml-3 flex-1">
         <Text numberOfLines={2} className="font-medium text-base text-ink">{event.title}</Text>
         <Text className="mt-1 font-sans text-xs text-muted">
+          {showDate && `${format(start, "EEE d 'de' MMM", { locale: es })} · `}
           {timeText(start)} – {timeText(new Date(event.ends_at))} · {event.place}
         </Text>
         {event.requires_registration && <Text className="mt-1 font-medium text-xs text-navy">{seatsInfo(event).text}</Text>}
         <View className="mt-2 flex-row gap-2">
-          <StatusBadge label={categoryLabels[event.category]} tone="red" />
+          <StatusBadge label={categoryText(event)} tone="red" />
           <StatusBadge {...phaseBadges[eventPhase(event)]} />
         </View>
       </View>

@@ -10,7 +10,7 @@ const options: { title: string; description: string; icon: keyof typeof Ionicons
   { title: 'Donaciones', description: 'Regala lo que ya no usas o pide algo que te sirva.', icon: 'gift-outline', href: '/comunidad/donaciones' },
   { title: 'Adopciones', description: 'Animales que buscan un hogar responsable.', icon: 'paw-outline', href: '/comunidad/adopciones' },
   { title: 'Eventos y campañas', description: 'Ferias, limpiezas, campañas de salud y más.', icon: 'calendar-outline', href: '/comunidad/eventos' },
-  { title: 'Talleres', description: 'Aprende algo nuevo e inscríbete con tu cupo.', icon: 'school-outline' },
+  { title: 'Talleres', description: 'Aprende algo nuevo e inscríbete con tu cupo.', icon: 'school-outline', href: '/comunidad/talleres' },
 ];
 
 export default function CommunityScreen() {

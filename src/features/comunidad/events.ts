@@ -1,10 +1,12 @@
 import { db, rpc, uploadPhotos } from './api';
 import type { CommunityEvent } from './event-model';
 
-export type EventInput = Omit<CommunityEvent, 'id' | 'organizer_id' | 'photo' | 'registered_count'> & { photo: { uri: string; path?: string } | null };
+type WorkshopFields = 'topic' | 'instructor' | 'level' | 'materials' | 'modality' | 'registration_deadline';
+export type EventInput = Omit<CommunityEvent, 'id' | 'organizer_id' | 'photo' | 'registered_count' | WorkshopFields> &
+  Partial<Pick<CommunityEvent, WorkshopFields>> & { photo: { uri: string; path?: string } | null };
 
-export async function fetchEvents() {
-  const { data, error } = await db().from('community_events').select('*').order('starts_at').limit(200);
+export async function fetchEvents(kind: CommunityEvent['kind'] = 'event') {
+  const { data, error } = await db().from('community_events').select('*').eq('kind', kind).order('starts_at').limit(200);
   if (error) throw error;
   return (data ?? []) as CommunityEvent[];
 }
@@ -15,10 +17,11 @@ export async function fetchEvent(id: string) {
   return data as CommunityEvent | null;
 }
 
-export async function saveEvent({ photo, ...input }: EventInput, id?: string) {
+// Al editar no se manda "kind": un evento no puede convertirse en taller ni al revés.
+export async function saveEvent({ photo, kind, ...input }: EventInput, id?: string) {
   const [path] = photo ? await uploadPhotos('eventos', [photo]) : [];
   const row = { ...input, photo: path ?? null };
-  const request = id ? db().from('community_events').update(row).eq('id', id) : db().from('community_events').insert(row);
+  const request = id ? db().from('community_events').update(row).eq('id', id) : db().from('community_events').insert({ ...row, kind });
   const { data, error } = await request.select('id').single();
   if (error) throw error;
   return String(data.id);
