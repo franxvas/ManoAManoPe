@@ -35,3 +35,24 @@ Guardar es un RPC con validación de dueño y de las fotos subidas. Ante un fall
 Aplicar `202610280003_completed_reviews.sql`. Se reutiliza `complete_deal_and_review` por compatibilidad, pero desde PR 1 ese nombre no implica completar: solo admite acuerdos ya completados. El autor no puede editar ni eliminar la reseña; una reseña por participante y acuerdo. Se muestran tipo de operación, fecha y nombre público, sin mensajes, montos, códigos ni identificadores privados del acuerdo.
 
 La edición del perfil pierde permisos sobre `rating_average`, `rating_count`, `verified` y fechas; las columnas de datos personales editables se conservan. Este es un cambio compartido mínimo de seguridad que Franco debe revisar. El promedio persistido se recalcula de reseñas vinculadas a acuerdos completados.
+
+## Indicadores e insignias
+
+Aplicar `202610280004_trust_indicators.sql`. `get_profile_trust` obtiene antigüedad desde el perfil y servicios confirmados desde `service_confirmations` y `deals`. Las reseñas se agregan directamente desde operaciones completadas, sin confiar en valores editables ni en la demostración. Solo se activan las insignias de primer servicio confirmado y diez acuerdos cuando esos umbrales existen en la fuente actual. No se muestran contadores de préstamos ni alquileres, y no hay un puntaje global.
+
+Se retiraron los checks de identidad de perfil, anuncio y formulario de publicación, porque no hay un proceso de verificación documentado. Las valoraciones de demostración se identifican como Demo o se ocultan. No se alteraron Inicio ni la barra de pestañas.
+
+## Demostración al profesor
+
+1. Mostrar el perfil y explicar la diferencia entre reputación real e identidad.
+2. Añadir un trabajo manual con fotos Antes y Después; ocultarlo y comprobar con otra sesión que no se ve.
+3. Con un acuerdo real de servicio aceptado, el trabajador solicita la confirmación. El cliente genera el código y el trabajador lo introduce. Mostrar que un código incorrecto falla y que el usado no sirve otra vez.
+4. Desde el acuerdo completado, publicar una reseña. Reintentar y comprobar que no se duplica.
+5. Vincular ese servicio al portafolio y ver el distintivo confirmado y los indicadores.
+6. Explicar que préstamos, alquileres y entregas futuras tienen contratos preparados, pero no se inventaron sus flujos.
+
+## Pruebas SQL locales
+
+Las pruebas usan PostgreSQL 16 con PostGIS en un contenedor etiquetado `manoam=billy`, sin publicar puertos. `supabase/tests/bootstrap.sql` simula únicamente las superficies de Auth y Storage necesarias; no reemplaza una prueba de integración con los servicios reales. Aplicar esquema inicial, luego las cuatro migraciones de Billy. Ejecutar `confirmations.sql`, `portfolio.sql`, `reviews.sql` y `trust.sql` antes de la prueba concurrente. Cada uno revierte sus datos de prueba.
+
+Para concurrencia, ejecutar `concurrency-setup.sql`, que deja únicamente datos ficticios en la base desechable; ejecutar después `scripts/test-confirmation-concurrency.py`. Debe obtenerse un éxito, un rechazo y un único mensaje de confirmación. Borrar el contenedor de pruebas al terminar; nunca usar estos scripts en la base compartida.

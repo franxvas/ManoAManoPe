@@ -5,6 +5,8 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/primary-button';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import { TrustSummary } from '@/features/confianza/summary';
 import { Avatar } from '@/components/avatar';
 import { BrandLogo } from '@/components/brand-logo';
 import { colors } from '@/constants/theme';
@@ -145,7 +147,7 @@ export default function ProfileScreen() {
         contentContainerClassName="pb-28"
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-5 py-3"><PrimaryButton label="Mi portafolio de trabajos" onPress={()=>router.push("/portafolio")}/></View>
+        <View className="px-5 py-3"><TrustSummary ownerId={profile.id}/><PrimaryButton label="Mi portafolio de trabajos" onPress={()=>router.push("/portafolio")}/></View>
         <View className="flex-row items-center justify-between bg-white px-5 pb-3 pt-2">
           <BrandLogo compact />
 
@@ -195,14 +197,7 @@ export default function ProfileScreen() {
               {profile.displayName}
             </Text>
 
-            {profile.verified && (
-              <Ionicons
-                name="checkmark-circle"
-                size={19}
-                color={colors.navy}
-                style={{ marginLeft: 6 }}
-              />
-            )}
+            
           </View>
 
           <Text className="mt-1 font-sans text-sm text-muted">
@@ -220,12 +215,12 @@ export default function ProfileScreen() {
             />
 
             <Stat
-              value={profile.ratingAverage.toFixed(1)}
+              value={isSupabaseConfigured ? profile.ratingAverage.toFixed(1) : '—'}
               label="Rating"
             />
 
             <Stat
-              value={String(profile.ratingCount)}
+              value={isSupabaseConfigured ? String(profile.ratingCount) : '—'}
               label="Reseñas"
               last
             />

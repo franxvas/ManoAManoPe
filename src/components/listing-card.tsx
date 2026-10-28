@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Alert, Pressable, Text, View } from 'react-native';
 
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { colors, listingLabels } from '@/constants/theme';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useProtectedAction } from '@/hooks/use-protected-action';
@@ -39,7 +40,7 @@ export function ListingCard({ listing, horizontal = false }: { listing: Listing;
         <Text className="mt-1 font-display text-xl text-brand">{formatMoney(getListingAmount(listing.price, listing.budget))}</Text>
         <View className="mt-2 flex-row items-center">
           <Ionicons name="star" size={14} color={colors.rating} />
-          <Text className="ml-1 font-medium text-xs text-ink">{listing.rating.toFixed(1)}</Text>
+          <Text className="ml-1 font-medium text-xs text-ink">{isSupabaseConfigured ? (listing.rating > 0 ? listing.rating.toFixed(1) : 'Sin reseñas') : 'Demo'}</Text>
           <Text className="mx-2 text-line">•</Text>
           <Ionicons name="location-outline" size={14} color={colors.muted} />
           <Text className="ml-1 flex-1 font-sans text-xs text-muted" numberOfLines={1}>{listing.city} · {listing.address}</Text>
