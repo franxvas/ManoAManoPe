@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/primary-button';
+import { PublicReviews } from '@/features/confianza/reviews';
 import { Avatar } from '@/components/avatar';
 import { EmptyState } from '@/components/empty-state';
 import { ListingCard } from '@/components/listing-card';
@@ -45,6 +46,7 @@ export default function PublicProfileScreen() {
             <View className="mt-4 flex-row items-center rounded-2xl bg-canvas p-4"><Ionicons name="star" size={20} color={colors.rating} /><Text className="ml-2 font-medium text-ink">{profile.ratingAverage.toFixed(1)} · {profile.ratingCount} reseñas</Text></View>
           </View>
           <View className="px-5 pt-4"><PrimaryButton label="Ver portafolio de trabajos" onPress={()=>router.push({pathname:"/portafolio",params:{ownerId:id}})}/></View>
+          <View className="px-5"><PublicReviews ownerId={id}/></View>
           <Text className="px-5 pb-3 pt-6 font-display text-2xl text-navy">Publicaciones</Text>
         </>}
         renderItem={({ item, index }) => <View className={`${index % 2 === 0 ? 'ml-5' : 'mr-5'} flex-1`}><ListingCard listing={item} /></View>}

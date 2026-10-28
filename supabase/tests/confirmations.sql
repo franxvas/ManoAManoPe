@@ -12,7 +12,7 @@ insert into public.deals(id,conversation_id,listing_id,accepted_offer_id,buyer_i
 create function public.test_assert(ok boolean,label text) returns void language plpgsql as $$ begin if ok is distinct from true then raise exception 'FALLO: %',label; end if; end $$;
 create function public.test_denied(statement text) returns void language plpgsql as $$ declare denied boolean:=false; begin begin execute statement; exception when others then denied:=true; end; if not denied then raise exception 'Se permitió una acción prohibida: %',statement; end if; end $$;
 grant usage on schema public to authenticated;
-grant select,insert,update,delete on public.profiles,public.reviews,public.deals to authenticated;
+grant select on public.profiles,public.reviews,public.deals to authenticated;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','a0000000-0000-4000-8000-000000000003',true);
 select public.test_denied($q$select public.get_service_confirmation('d0000000-0000-4000-8000-000000000001')$q$);

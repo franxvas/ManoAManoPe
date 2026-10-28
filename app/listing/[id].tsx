@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PublicReviews } from '@/features/confianza/reviews';
 import { Avatar } from '@/components/avatar';
 import { EmptyState } from '@/components/empty-state';
 import { PrimaryButton } from '@/components/primary-button';
@@ -97,6 +98,7 @@ export default function ListingDetailScreen() {
           <Text className="font-display text-xl text-navy">Descripción</Text><Text className="mt-3 font-sans text-[15px] leading-6 text-ink">{listing.description}</Text>
           <View className="mt-6 rounded-2xl bg-canvas p-4"><Text className="mb-3 font-display text-lg text-navy">Información</Text>{Boolean(listing.condition) && <Info icon="sparkles-outline" text={`Condición: ${listing.condition}`} />}{Boolean(listing.serviceArea) && <Info icon="map-outline" text={`Zona de atención: ${listing.serviceArea}`} />}{Boolean(listing.availability) && <Info icon="time-outline" text={`Disponibilidad: ${listing.availability}`} />}{listing.homeService && <Info icon="home-outline" text="Atención a domicilio" />}{listing.shippingAvailable && <Info icon="cube-outline" text="Envío disponible" />}</View>
           <Pressable onPress={() => router.push({ pathname: '/profile/[id]', params: { id: listing.ownerId } })} className="mt-5 rounded-2xl border border-line p-4"><Text className="mb-4 font-display text-xl text-navy">Publicado por</Text><View className="flex-row items-center"><Avatar uri={listing.ownerAvatar} name={listing.ownerName} size={58} /><View className="ml-3 flex-1"><View className="flex-row items-center"><Text className="font-display text-lg text-ink">{listing.ownerName}</Text>{listing.ownerVerified && <Ionicons name="checkmark-circle" size={17} color={colors.navy} style={{ marginLeft: 5 }} />}</View><Text className="mt-1 font-sans text-xs text-muted">{listing.ownerProfession}</Text><Text className="mt-1 font-medium text-xs text-ink">★ {listing.rating.toFixed(1)}</Text></View><Ionicons name="chevron-forward" size={20} color={colors.muted} /></View></Pressable>
+          <PublicReviews ownerId={listing.ownerId} listingId={listing.id}/>
           <View className="mt-5 h-36 items-center justify-center rounded-2xl bg-blue-50"><Ionicons name="map" size={34} color={colors.navy} /><Text className="mt-2 font-medium text-sm text-navy">{listing.city}, {listing.region}</Text><Text className="mt-1 font-sans text-xs text-muted">Ubicación aproximada por seguridad</Text></View>
         </View>
       </ScrollView>

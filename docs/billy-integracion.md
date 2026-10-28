@@ -29,3 +29,9 @@ Las migraciones están preparadas; no asumir que están aplicadas a Supabase com
 Aplicar después `202610280002_portfolio.sql`. Las rutas son `/portafolio`, `/portafolio/[id]?ownerId=UUID` y `/portafolio/editar`. El mes es aproximado, las imágenes admiten JPG, PNG y WebP hasta 8 MB, entre una y seis. Los archivos van a `portfolio-media/propietario/trabajo/archivo`, bucket privado. Los enlaces firmados caducan en cinco minutos; ocultar un trabajo no revoca enlaces ya emitidos hasta su vencimiento.
 
 Guardar es un RPC con validación de dueño y de las fotos subidas. Ante un fallo de red se consulta si las fotos quedaron referenciadas antes de limpiarlas; si no se puede comprobar, se conservan para evitar borrar contenido válido. Esto puede dejar objetos pendientes y requiere una limpieza administrativa posterior. No hay una transacción distribuida entre Storage y PostgreSQL. Eliminar devuelve las rutas para limpiar y muestra si queda pendiente algún objeto.
+
+## Reseñas
+
+Aplicar `202610280003_completed_reviews.sql`. Se reutiliza `complete_deal_and_review` por compatibilidad, pero desde PR 1 ese nombre no implica completar: solo admite acuerdos ya completados. El autor no puede editar ni eliminar la reseña; una reseña por participante y acuerdo. Se muestran tipo de operación, fecha y nombre público, sin mensajes, montos, códigos ni identificadores privados del acuerdo.
+
+La edición del perfil pierde permisos sobre `rating_average`, `rating_count`, `verified` y fechas; las columnas de datos personales editables se conservan. Este es un cambio compartido mínimo de seguridad que Franco debe revisar. El promedio persistido se recalcula de reseñas vinculadas a acuerdos completados.
