@@ -1,9 +1,9 @@
 # Orden de revisión de Billy
 
-1. `codex/billy-confirmaciones` sobre `main`: códigos y contratos.
-2. `codex/billy-portafolio` sobre `codex/billy-confirmaciones`: portafolio y Storage.
-3. `codex/billy-resenas` sobre `codex/billy-portafolio`: reseñas de operaciones completadas.
-4. `codex/billy-confianza` sobre `codex/billy-resenas`: indicadores y perfil.
+1. `billy-confirmaciones` sobre `main`: códigos y contratos.
+2. `billy-portafolio` sobre `billy-confirmaciones`: portafolio y Storage.
+3. `billy-resenas` sobre `billy-portafolio`: reseñas de operaciones completadas.
+4. `billy-confianza` sobre `billy-resenas`: indicadores y perfil.
 
 Las ramas se encadenan para no repetir el mismo diff en cada PR. Revisar y fusionar en este orden; después de fusionar un PR, cambiar la base del siguiente a main. No fusionar desde esta tarea.
 
