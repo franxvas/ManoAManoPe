@@ -8,9 +8,9 @@ import { EmptyState } from '@/components/empty-state';
 import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
-import { fetchAdoptions } from '@/features/comunidad/adoptions';
+import { fetchAdoptions } from '@/features/comunidad/adopciones/api';
 import { CommunityCard } from '@/features/comunidad/components';
-import { adoptionStatus, sizeLabels, speciesLabels, type Adoption } from '@/features/comunidad/model';
+import { adoptionStatus, sizeLabels, speciesLabels, type Adoption } from '@/features/comunidad/adopciones/model';
 import { useProtectedAction } from '@/hooks/use-protected-action';
 import { isSupabaseConfigured } from '@/lib/supabase';
 

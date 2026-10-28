@@ -10,20 +10,10 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { photoUrl } from '@/features/comunidad/api';
 import { ChoiceChips, PhotoPicker, type Photo } from '@/features/comunidad/components';
-import { DayStrip, nextDays } from '@/features/comunidad/event-components';
-import {
-  categoryLabels,
-  dayKey,
-  deadlineFrom,
-  levelLabels,
-  modalityLabels,
-  parseCapacity,
-  timeText,
-  validateEvent,
-  validateWorkshop,
-  type CommunityEvent,
-} from '@/features/comunidad/event-model';
-import { fetchEvent, saveEvent } from '@/features/comunidad/events';
+import { DayStrip, nextDays } from '@/features/comunidad/eventos/components';
+import { fetchEvent, saveEvent } from '@/features/comunidad/eventos/api';
+import { categoryLabels, dayKey, parseCapacity, timeText, validateEvent, type CommunityEvent } from '@/features/comunidad/eventos/model';
+import { deadlineFrom, levelLabels, modalityLabels, validateWorkshop } from '@/features/comunidad/talleres/model';
 
 const costOptions = { free: 'Gratuito', paid: 'Tiene un costo' };
 const registrationOptions = { no: 'No, entrada libre', yes: 'Sí, con inscripción' };

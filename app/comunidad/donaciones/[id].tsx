@@ -10,9 +10,9 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { InfoRow, PhotoGallery, StatusBadge } from '@/features/comunidad/components';
-import { DonationRequestsPanel } from '@/features/comunidad/donation-requests';
-import { deleteDonation, fetchDonation } from '@/features/comunidad/donations';
-import { conditionLabels, donationStatus } from '@/features/comunidad/model';
+import { DonationRequestsPanel } from '@/features/comunidad/donaciones/solicitudes';
+import { deleteDonation, fetchDonation } from '@/features/comunidad/donaciones/api';
+import { conditionLabels, donationStatus } from '@/features/comunidad/donaciones/model';
 
 export default function DonationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();

@@ -8,10 +8,10 @@ import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
-import { fetchAdoption, saveAdoption } from '@/features/comunidad/adoptions';
+import { fetchAdoption, saveAdoption } from '@/features/comunidad/adopciones/api';
 import { photoUrl } from '@/features/comunidad/api';
 import { ChoiceChips, PhotoPicker, type Photo } from '@/features/comunidad/components';
-import { sizeLabels, speciesLabels, validateAdoption, type Adoption } from '@/features/comunidad/model';
+import { sizeLabels, speciesLabels, validateAdoption, type Adoption } from '@/features/comunidad/adopciones/model';
 
 export default function AdoptionFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();

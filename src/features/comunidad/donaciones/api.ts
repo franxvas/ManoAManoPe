@@ -1,5 +1,5 @@
-import { db, uploadPhotos } from './api';
-import type { Donation } from './model';
+import { db, rpc, uploadPhotos } from '../api';
+import type { Donation, DonationRequest } from './model';
 
 export interface DonationInput {
   title: string;
@@ -50,3 +50,20 @@ export async function deleteDonation(id: string) {
   const { error } = await db().from('donations').delete().eq('id', id);
   if (error) throw error;
 }
+
+// Gracias a RLS el dueño recibe todas las solicitudes y los demás solo la suya.
+export async function fetchDonationRequests(donationId: string): Promise<DonationRequest[]> {
+  const { data, error } = await db()
+    .from('donation_requests')
+    .select('*, requester:profiles(display_name)')
+    .eq('donation_id', donationId)
+    .order('created_at');
+  if (error) throw error;
+  return (data ?? []).map(({ requester, ...row }) => ({ ...row, requester_name: requester?.display_name ?? 'Vecino' }));
+}
+
+export const requestDonation = (donationId: string, message: string) => rpc<string>('request_donation', { p_donation: donationId, p_message: message });
+export const withdrawDonationRequest = (requestId: string) => rpc('withdraw_donation_request', { p_request: requestId });
+export const selectDonationRequest = (requestId: string) => rpc('select_donation_request', { p_request: requestId });
+export const markDonationDelivered = (donationId: string) => rpc('mark_donation_delivered', { p_donation: donationId });
+export const cancelDonationAgreement = (donationId: string) => rpc('cancel_donation_agreement', { p_donation: donationId });

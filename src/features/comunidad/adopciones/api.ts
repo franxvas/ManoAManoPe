@@ -1,5 +1,5 @@
-import { db, uploadPhotos } from './api';
-import type { Adoption } from './model';
+import { db, rpc, uploadPhotos } from '../api';
+import type { Adoption, AdoptionApplication } from './model';
 
 export interface AdoptionInput {
   petName: string;
@@ -54,3 +54,28 @@ export async function deleteAdoption(id: string) {
   const { error } = await db().from('adoptions').delete().eq('id', id);
   if (error) throw error;
 }
+
+// Gracias a RLS el dueño recibe todas las solicitudes y los demás solo la suya.
+export async function fetchAdoptionApplications(adoptionId: string): Promise<AdoptionApplication[]> {
+  const { data, error } = await db()
+    .from('adoption_applications')
+    .select('*, applicant:profiles(display_name)')
+    .eq('adoption_id', adoptionId)
+    .order('created_at');
+  if (error) throw error;
+  return (data ?? []).map(({ applicant, ...row }) => ({ ...row, applicant_name: applicant?.display_name ?? 'Vecino' }));
+}
+
+export const applyForAdoption = (adoptionId: string, answers: { housing: string; otherPets: string; dailyCare: string; experience: string; message: string }) =>
+  rpc<string>('apply_for_adoption', {
+    p_adoption: adoptionId,
+    p_housing: answers.housing,
+    p_other_pets: answers.otherPets,
+    p_daily_care: answers.dailyCare,
+    p_experience: answers.experience,
+    p_message: answers.message,
+  });
+export const reviewApplication = (applicationId: string, action: 'evaluate' | 'decline' | 'agree') => rpc('review_adoption_application', { p_application: applicationId, p_action: action });
+export const completeAdoption = (adoptionId: string) => rpc('complete_adoption', { p_adoption: adoptionId });
+export const cancelAdoptionProcess = (adoptionId: string) => rpc('cancel_adoption_process', { p_adoption: adoptionId });
+export const withdrawApplication = (applicationId: string) => rpc('withdraw_adoption_application', { p_application: applicationId });

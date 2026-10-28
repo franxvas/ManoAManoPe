@@ -3,9 +3,10 @@ import { Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/primary-button';
 import { useProtectedAction } from '@/hooks/use-protected-action';
-import { eventPhase, registrationClosed, seatsInfo, type CommunityEvent } from './event-model';
-import { cancelRegistration, isRegistered, registerForEvent } from './events';
-import { useCommunityAction } from './use-action';
+import { registrationClosed } from '../talleres/model';
+import { eventPhase, seatsInfo, type CommunityEvent } from './model';
+import { cancelRegistration, isRegistered, registerForEvent } from './api';
+import { useCommunityAction } from '../use-action';
 
 export function RegistrationPanel({ event, userId }: { event: CommunityEvent; userId?: string }) {
   const protect = useProtectedAction();

@@ -10,8 +10,8 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { photoUrl } from '@/features/comunidad/api';
 import { ChoiceChips, PhotoPicker, type Photo } from '@/features/comunidad/components';
-import { fetchDonation, saveDonation } from '@/features/comunidad/donations';
-import { conditionLabels, validateDonation, type Donation } from '@/features/comunidad/model';
+import { fetchDonation, saveDonation } from '@/features/comunidad/donaciones/api';
+import { conditionLabels, validateDonation, type Donation } from '@/features/comunidad/donaciones/model';
 
 export default function DonationFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();

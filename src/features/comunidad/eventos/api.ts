@@ -1,5 +1,5 @@
-import { db, rpc, uploadPhotos } from './api';
-import type { CommunityEvent } from './event-model';
+import { db, rpc, uploadPhotos } from '../api';
+import type { CommunityEvent } from './model';
 
 type WorkshopFields = 'topic' | 'instructor' | 'level' | 'materials' | 'modality' | 'registration_deadline';
 export type EventInput = Omit<CommunityEvent, 'id' | 'organizer_id' | 'photo' | 'registered_count' | WorkshopFields> &

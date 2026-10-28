@@ -5,7 +5,7 @@ import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from
 
 import { colors } from '@/constants/theme';
 import { photoUrl } from './api';
-import type { Tone } from './model';
+import type { Tone } from './types';
 
 export type Photo = { uri: string; path?: string };
 

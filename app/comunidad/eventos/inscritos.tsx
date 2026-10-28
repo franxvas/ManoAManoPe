@@ -8,8 +8,8 @@ import { EmptyState } from '@/components/empty-state';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
-import { eventPhase, seatsInfo } from '@/features/comunidad/event-model';
-import { fetchAttendees, fetchEvent, setAttendance, type Attendee } from '@/features/comunidad/events';
+import { eventPhase, seatsInfo } from '@/features/comunidad/eventos/model';
+import { fetchAttendees, fetchEvent, setAttendance, type Attendee } from '@/features/comunidad/eventos/api';
 import { useCommunityAction } from '@/features/comunidad/use-action';
 import { formatRelativeDate } from '@/utils/format';
 

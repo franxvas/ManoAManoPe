@@ -9,8 +9,8 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { CommunityCard } from '@/features/comunidad/components';
-import { fetchDonations } from '@/features/comunidad/donations';
-import { conditionLabels, donationStatus } from '@/features/comunidad/model';
+import { fetchDonations } from '@/features/comunidad/donaciones/api';
+import { conditionLabels, donationStatus } from '@/features/comunidad/donaciones/model';
 import { useProtectedAction } from '@/hooks/use-protected-action';
 import { isSupabaseConfigured } from '@/lib/supabase';
 

@@ -9,9 +9,9 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
-import { DayStrip, EventCard, dayTitle, nextDays } from '@/features/comunidad/event-components';
-import { dayKey, eventPhase } from '@/features/comunidad/event-model';
-import { fetchEvents, fetchSavedEventIds } from '@/features/comunidad/events';
+import { DayStrip, EventCard, dayTitle, nextDays } from '@/features/comunidad/eventos/components';
+import { dayKey, eventPhase } from '@/features/comunidad/eventos/model';
+import { fetchEvents, fetchSavedEventIds } from '@/features/comunidad/eventos/api';
 import { useProtectedAction } from '@/hooks/use-protected-action';
 import { isSupabaseConfigured } from '@/lib/supabase';
 

@@ -9,10 +9,10 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
-import { AdoptionRequestsPanel } from '@/features/comunidad/adoption-requests';
-import { deleteAdoption, fetchAdoption } from '@/features/comunidad/adoptions';
+import { AdoptionRequestsPanel } from '@/features/comunidad/adopciones/solicitudes';
+import { deleteAdoption, fetchAdoption } from '@/features/comunidad/adopciones/api';
 import { InfoRow, PhotoGallery, StatusBadge } from '@/features/comunidad/components';
-import { adoptionStatus, sizeLabels, speciesLabels } from '@/features/comunidad/model';
+import { adoptionStatus, sizeLabels, speciesLabels } from '@/features/comunidad/adopciones/model';
 
 export default function AdoptionDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();

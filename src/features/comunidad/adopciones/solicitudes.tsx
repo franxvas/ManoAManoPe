@@ -6,19 +6,18 @@ import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
 import { colors } from '@/constants/theme';
 import { useProtectedAction } from '@/hooks/use-protected-action';
-import { StatusBadge } from './components';
-import type { Adoption } from './model';
+import { StatusBadge } from '../components';
+import { requestStatusLabels } from '../solicitudes';
+import { useCommunityAction } from '../use-action';
 import {
   applyForAdoption,
   cancelAdoptionProcess,
   completeAdoption,
   fetchAdoptionApplications,
-  requestStatusLabels,
   reviewApplication,
   withdrawApplication,
-  type AdoptionApplication,
-} from './requests';
-import { useCommunityAction } from './use-action';
+} from './api';
+import type { Adoption, AdoptionApplication } from './model';
 
 export function AdoptionRequestsPanel({ adoption, userId }: { adoption: Adoption; userId?: string }) {
   const isOwner = adoption.owner_id === userId;

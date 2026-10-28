@@ -13,10 +13,11 @@ import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { photoUrl } from '@/features/comunidad/api';
 import { InfoRow, StatusBadge } from '@/features/comunidad/components';
-import { dayTitle } from '@/features/comunidad/event-components';
-import { RegistrationPanel } from '@/features/comunidad/event-registration';
-import { categoryText, dayKey, durationText, eventPhase, levelLabels, modalityLabels, phaseBadges, timeText } from '@/features/comunidad/event-model';
-import { deleteEvent, fetchEvent, fetchSavedEventIds, toggleSavedEvent } from '@/features/comunidad/events';
+import { dayTitle } from '@/features/comunidad/eventos/components';
+import { RegistrationPanel } from '@/features/comunidad/eventos/inscripcion';
+import { categoryText, dayKey, durationText, eventPhase, phaseBadges, timeText } from '@/features/comunidad/eventos/model';
+import { levelLabels, modalityLabels } from '@/features/comunidad/talleres/model';
+import { deleteEvent, fetchEvent, fetchSavedEventIds, toggleSavedEvent } from '@/features/comunidad/eventos/api';
 import { useCommunityAction } from '@/features/comunidad/use-action';
 import { useProtectedAction } from '@/hooks/use-protected-action';
 

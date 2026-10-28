@@ -9,7 +9,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { StatusBadge } from '@/features/comunidad/components';
-import { fetchMyRequests, requestStatusLabels } from '@/features/comunidad/requests';
+import { fetchMyRequests, requestStatusLabels } from '@/features/comunidad/solicitudes';
 import { formatRelativeDate } from '@/utils/format';
 
 export default function MyRequestsScreen() {

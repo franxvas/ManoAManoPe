@@ -5,9 +5,9 @@ import { Image } from 'expo-image';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { colors } from '@/constants/theme';
-import { photoUrl } from './api';
-import { StatusBadge } from './components';
-import { categoryText, dayKey, eventPhase, parseDay, phaseBadges, seatsInfo, timeText, type CommunityEvent } from './event-model';
+import { photoUrl } from '../api';
+import { StatusBadge } from '../components';
+import { categoryText, dayKey, eventPhase, parseDay, phaseBadges, seatsInfo, timeText, type CommunityEvent } from './model';
 
 export function nextDays(count: number, from = new Date()) {
   return Array.from({ length: count }, (_, i) => new Date(from.getFullYear(), from.getMonth(), from.getDate() + i));

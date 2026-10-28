@@ -7,9 +7,9 @@ import { EmptyState } from '@/components/empty-state';
 import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
-import { EventCard } from '@/features/comunidad/event-components';
-import { eventPhase } from '@/features/comunidad/event-model';
-import { fetchEvents } from '@/features/comunidad/events';
+import { EventCard } from '@/features/comunidad/eventos/components';
+import { eventPhase } from '@/features/comunidad/eventos/model';
+import { fetchEvents } from '@/features/comunidad/eventos/api';
 import { useProtectedAction } from '@/hooks/use-protected-action';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
