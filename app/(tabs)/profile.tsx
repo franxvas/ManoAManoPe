@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PrimaryButton } from '@/components/primary-button';
 import { Avatar } from '@/components/avatar';
 import { BrandLogo } from '@/components/brand-logo';
 import { colors } from '@/constants/theme';
@@ -144,6 +145,7 @@ export default function ProfileScreen() {
         contentContainerClassName="pb-28"
         showsVerticalScrollIndicator={false}
       >
+        <View className="px-5 py-3"><PrimaryButton label="Mi portafolio de trabajos" onPress={()=>router.push("/portafolio")}/></View>
         <View className="flex-row items-center justify-between bg-white px-5 pb-3 pt-2">
           <BrandLogo compact />
 
