@@ -19,7 +19,7 @@ export default function CommunityScreen() {
       <ScreenHeader title="Comunidad" showBack />
       <ScrollView contentContainerClassName="p-5 pb-12 gap-3">
         <Text className="font-sans text-sm leading-5 text-muted">
-          Aquí no hay precios ni ofertas. Es un espacio para ayudarnos entre vecinos de Bagua.
+          Aquí no hay precios ni ofertas. Es un espacio para ayudarnos entre todos.
         </Text>
         {options.map((option) => (
           <Pressable
