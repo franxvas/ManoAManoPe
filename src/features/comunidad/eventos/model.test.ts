@@ -1,0 +1,51 @@
+import { durationText, eventPhase, joinDateTime, parseCapacity, seatsInfo, validateEvent } from './model';
+
+describe('duración', () => {
+  it('calcula la duración', () => {
+    expect(durationText('2026-11-07T14:00:00.000Z', '2026-11-07T17:00:00.000Z')).toBe('3 horas');
+    expect(durationText('2026-11-07T14:00:00.000Z', '2026-11-07T15:30:00.000Z')).toBe('1 h 30 min');
+  });
+});
+
+describe('cupos', () => {
+  it('muestra cuántos quedan y cuando se llena', () => {
+    expect(seatsInfo({ capacity: 15, registered_count: 11 })).toEqual({ full: false, text: 'Quedan 4 de 15 cupos' });
+    expect(seatsInfo({ capacity: 15, registered_count: 15 })).toEqual({ full: true, text: 'Sin cupos' });
+    expect(seatsInfo({ capacity: null, registered_count: 1 }).text).toBe('1 inscrito');
+  });
+
+  it('acepta capacidad vacía o un número válido', () => {
+    expect(parseCapacity('')).toBeNull();
+    expect(parseCapacity('15')).toBe(15);
+    expect(() => parseCapacity('0')).toThrow();
+    expect(() => parseCapacity('dos')).toThrow();
+  });
+});
+
+const now = new Date(2026, 9, 28, 12, 0);
+
+describe('eventos', () => {
+  it('pasa a finalizado cuando termina el horario', () => {
+    const event = { starts_at: new Date(2026, 9, 28, 9).toISOString(), ends_at: new Date(2026, 9, 28, 13).toISOString() };
+    expect(eventPhase(event, new Date(2026, 9, 28, 8))).toBe('upcoming');
+    expect(eventPhase(event, now)).toBe('ongoing');
+    expect(eventPhase(event, new Date(2026, 9, 28, 13))).toBe('finished');
+  });
+
+  it('arma la fecha con el día y la hora', () => {
+    expect(joinDateTime('2026-11-07', '9:30')).toEqual(new Date(2026, 10, 7, 9, 30));
+    expect(joinDateTime('2026-11-07', '25:00')).toBeNull();
+  });
+
+  const valid = { title: 'Campaña de evaluación visual', organizerName: 'Óptica Bagua', description: 'Evaluación gratuita de la vista para todas las edades.', place: 'Plaza de Armas', day: '2026-11-07', startTime: '09:00', endTime: '13:00', isFree: true, costNote: '' };
+
+  it('acepta un evento bien llenado', () => {
+    expect(() => validateEvent(valid, now)).not.toThrow();
+  });
+
+  it('rechaza horas al revés, eventos pasados y costos sin detalle', () => {
+    expect(() => validateEvent({ ...valid, endTime: '08:00' }, now)).toThrow();
+    expect(() => validateEvent({ ...valid, day: '2026-10-01' }, now)).toThrow();
+    expect(() => validateEvent({ ...valid, isFree: false }, now)).toThrow();
+  });
+});
