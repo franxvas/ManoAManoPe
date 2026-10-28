@@ -10,6 +10,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { InfoRow, PhotoGallery, StatusBadge } from '@/features/comunidad/components';
+import { DonationRequestsPanel } from '@/features/comunidad/donation-requests';
 import { deleteDonation, fetchDonation } from '@/features/comunidad/donations';
 import { conditionLabels, donationStatus } from '@/features/comunidad/model';
 
@@ -54,6 +55,7 @@ export default function DonationDetail() {
               <InfoRow icon="time-outline" label="Condiciones y horario de recojo" value={donation.pickup_terms} />
             </View>
           </View>
+          <DonationRequestsPanel donation={donation} userId={session?.user.id} />
           {isOwner && (
             <View className="mt-3 gap-3 bg-white p-5">
               <PrimaryButton variant="outline" label="Editar donación" onPress={() => router.push({ pathname: '/comunidad/donaciones/nueva', params: { id } })} />

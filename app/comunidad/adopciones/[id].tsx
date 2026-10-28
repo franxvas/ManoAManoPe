@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
+import { AdoptionRequestsPanel } from '@/features/comunidad/adoption-requests';
 import { deleteAdoption, fetchAdoption } from '@/features/comunidad/adoptions';
 import { InfoRow, PhotoGallery, StatusBadge } from '@/features/comunidad/components';
 import { adoptionStatus, sizeLabels, speciesLabels } from '@/features/comunidad/model';
@@ -56,6 +57,7 @@ export default function AdoptionDetail() {
               <InfoRow icon="person-outline" label="Publicado por" value={adoption.owner_name} />
             </View>
           </View>
+          <AdoptionRequestsPanel adoption={adoption} userId={session?.user.id} />
           {isOwner && (
             <View className="mt-3 gap-3 bg-white p-5">
               <PrimaryButton variant="outline" label="Editar ficha" onPress={() => router.push({ pathname: '/comunidad/adopciones/nueva', params: { id } })} />

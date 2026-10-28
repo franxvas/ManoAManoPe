@@ -39,6 +39,10 @@ export default function CommunityScreen() {
             {option.href && <Ionicons name="chevron-forward" size={20} color={colors.muted} />}
           </Pressable>
         ))}
+        <Pressable accessibilityRole="button" onPress={() => router.push('/comunidad/mis-solicitudes')} className="mt-2 flex-row items-center justify-center py-3">
+          <Ionicons name="file-tray-outline" size={18} color={colors.navy} />
+          <Text className="ml-2 font-medium text-sm text-navy">Ver mis solicitudes</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
