@@ -47,19 +47,19 @@ export function ChoiceChips<T extends string>({ label, options, value, onChange 
   );
 }
 
-export function PhotoPicker({ photos, onChange, onError }: { photos: Photo[]; onChange: (photos: Photo[]) => void; onError: (message: string) => void }) {
+export function PhotoPicker({ photos, onChange, onError, max = 6, label = 'Fotografías (hasta seis)' }: { photos: Photo[]; onChange: (photos: Photo[]) => void; onError: (message: string) => void; max?: number; label?: string }) {
   async function pick() {
     if (Platform.OS !== 'web') {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) return onError('Permite el acceso a tus fotos para poder añadirlas.');
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsMultipleSelection: true, selectionLimit: 6 - photos.length, quality: 0.8 });
-    if (!result.canceled) onChange([...photos, ...result.assets.map((asset) => ({ uri: asset.uri }))].slice(0, 6));
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsMultipleSelection: max > 1, selectionLimit: max - photos.length, quality: 0.8 });
+    if (!result.canceled) onChange([...photos, ...result.assets.map((asset) => ({ uri: asset.uri }))].slice(0, max));
   }
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 font-medium text-sm text-ink">Fotografías (hasta seis)</Text>
+      <Text className="mb-2 font-medium text-sm text-ink">{label}</Text>
       <View className="flex-row flex-wrap gap-2">
         {photos.map((photo, index) => (
           <View key={photo.path ?? photo.uri} className="relative">
@@ -73,7 +73,7 @@ export function PhotoPicker({ photos, onChange, onError }: { photos: Photo[]; on
             </Pressable>
           </View>
         ))}
-        {photos.length < 6 && (
+        {photos.length < max && (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Añadir fotos"
