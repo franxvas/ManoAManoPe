@@ -61,3 +61,17 @@ insert into public.listing_media (listing_id, storage_path, public_url, sort_ord
   ('30000000-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000003/cover.jpg', 'https://wvxnzvatfewbktdrxacw.supabase.co/storage/v1/object/public/listing-media/22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000003/cover.jpg', 0),
   ('30000000-0000-4000-8000-000000000004', '22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000004/cover.jpg', 'https://wvxnzvatfewbktdrxacw.supabase.co/storage/v1/object/public/listing-media/22222222-2222-4222-8222-222222222222/30000000-0000-4000-8000-000000000004/cover.jpg', 0)
 on conflict (storage_path) do nothing;
+
+-- Datos de prueba del módulo Necesito una mano (solo para entornos de desarrollo).
+insert into public.mano_requests(id,owner_id,kind,title,category,description,budget_min,budget_max,modality,approximate_location,repair_item,brand_model,problem_since,transport) values
+ ('a1000000-0000-4000-8000-000000000001','11111111-1111-4111-8111-111111111111','help','Pintar una habitación','Pintura','Necesito pintar una habitación esta semana.',250,250,'home','Bagua',null,null,null,null),
+ ('a1000000-0000-4000-8000-000000000002','11111111-1111-4111-8111-111111111111','repair','Mi moto no enciende','Mecánica','Mi moto no enciende; necesito una revisión.',null,200,'home','Bagua','Moto',null,'Una semana','Necesito atención a domicilio'),
+ ('a1000000-0000-4000-8000-000000000003','11111111-1111-4111-8111-111111111111','project','Organizar una feria','Eventos','Necesito fotografía, decoración y sonido.',null,null,'home','Bagua',null,null,null,null)
+on conflict(id) do nothing;
+insert into public.mano_tasks(id,request_id,title,budget_min,budget_max) values
+ ('a2000000-0000-4000-8000-000000000001','a1000000-0000-4000-8000-000000000001','Pintar habitación',250,250),
+ ('a2000000-0000-4000-8000-000000000002','a1000000-0000-4000-8000-000000000002','Revisar moto',null,200),
+ ('a2000000-0000-4000-8000-000000000003','a1000000-0000-4000-8000-000000000003','Fotografía',200,200),
+ ('a2000000-0000-4000-8000-000000000004','a1000000-0000-4000-8000-000000000003','Decoración',150,150),
+ ('a2000000-0000-4000-8000-000000000005','a1000000-0000-4000-8000-000000000003','Sonido',null,null)
+on conflict(id) do nothing;
