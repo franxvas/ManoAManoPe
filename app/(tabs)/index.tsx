@@ -21,6 +21,7 @@ const quickLinks: { type?: ListingType; label: string; icon: keyof typeof Ionico
   { type: 'promotion', label: 'Promociones', icon: 'pricetag-outline' },
   { type: 'need', label: 'Necesidades', icon: 'megaphone-outline' },
   { label: 'Cerca de ti', icon: 'location-outline' },
+  { label: 'Comunidad', icon: 'people-outline' },
 ];
 
 export default function HomeScreen() {
@@ -51,7 +52,7 @@ export default function HomeScreen() {
           {quickLinks.map((item) => {
             const active = item.type === type && item.type !== undefined;
             return (
-              <Pressable key={item.label} onPress={() => item.type ? setType(active ? undefined : item.type) : router.push('/(tabs)/explore')} className="items-center" accessibilityRole="button" accessibilityLabel={item.label}>
+              <Pressable key={item.label} onPress={() => item.type ? setType(active ? undefined : item.type) : router.push(item.label === 'Comunidad' ? '/comunidad' : '/(tabs)/explore')} className="items-center" accessibilityRole="button" accessibilityLabel={item.label}>
                 <View className={`h-14 w-14 items-center justify-center rounded-2xl ${active ? 'bg-brand' : 'bg-white'}`}>
                   <Ionicons name={item.icon} size={25} color={active ? colors.white : colors.navy} />
                 </View>
