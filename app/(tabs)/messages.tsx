@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useEffect } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/empty-state';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { PrimaryButton } from '@/components/primary-button';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { fetchRemoteConversations, removeRealtimeChannel, subscribeToConversationList } from '@/services/social';
 import { useAppStore } from '@/stores/app-store';
 import { formatRelativeDate } from '@/utils/format';
@@ -22,6 +22,7 @@ export default function MessagesScreen() {
   const queryClient = useQueryClient();
   const { session, isAuthenticated } = useAuth();
   const remote = useQuery({ queryKey: ['conversations'], queryFn: fetchRemoteConversations, enabled: isSupabaseConfigured && Boolean(session), refetchInterval: 30_000 });
+  const requests = useQuery({ queryKey: ['mano-threads', session?.user.id], enabled: isSupabaseConfigured && Boolean(session), refetchInterval: 15000, queryFn: async () => { const {data,error}=await supabase!.rpc('mano_list_threads'); if(error) throw error; return (data ?? []) as {proposal_id:string;request_id:string;task_id:string;request_title:string;task_title:string;participant_name:string;last_message:string}[]; } });
   const conversations = [...(isSupabaseConfigured ? (remote.data ?? []) : localConversations)].sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
   useEffect(() => {
     if (!isSupabaseConfigured || !session) return;
@@ -39,6 +40,7 @@ export default function MessagesScreen() {
         data={conversations}
         keyExtractor={(item) => item.id}
         contentContainerClassName="p-5 pb-28"
+        ListHeaderComponent={<View>{requests.isError && <Text className="mb-3 text-brand">No se pudieron cargar las conversaciones de solicitudes.</Text>}{requests.data?.map(thread=><Pressable key={thread.proposal_id} className="mb-3 rounded-2xl bg-white p-4" onPress={()=>router.push(('/mano?requestId='+thread.request_id+'&taskId='+thread.task_id) as Href)}><Text className="font-display text-lg text-navy">{thread.participant_name}</Text><Text className="text-sm text-brand">Necesito una mano · {thread.request_title}</Text><Text className="text-sm text-muted">{thread.task_title} · {thread.last_message}</Text></Pressable>)}</View>}
         ListEmptyComponent={<EmptyState icon="chatbubbles-outline" title="Aún no tienes conversaciones" description="Contacta a alguien desde una publicación para empezar." />}
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push({ pathname: '/conversation/[id]', params: { id: item.id } })} className="mb-3 flex-row items-center rounded-2xl border border-line bg-white p-4">

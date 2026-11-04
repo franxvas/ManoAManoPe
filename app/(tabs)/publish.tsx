@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +22,7 @@ export default function PublishChoiceScreen() {
       <View className="flex-1 px-5 pt-5">
       <Text className="font-display text-3xl text-navy">¿Qué quieres publicar?</Text>
       <Text className="mt-2 font-sans text-base text-muted">Elige una opción para empezar</Text>
+      <Pressable onPress={() => router.push('/mano' as Href)} className="mt-5 rounded-2xl bg-white p-4"><Text className="font-display text-xl text-navy">Necesito una mano →</Text><Text className="mt-1 font-sans text-sm text-muted">Solicitudes, reparaciones y proyectos · vista previa</Text></Pressable>
       {!isAuthenticated ? (
         <View className="mt-14 rounded-3xl bg-white p-7">
           <View className="mb-5 h-14 w-14 items-center justify-center rounded-2xl bg-red-50"><Ionicons name="lock-closed-outline" size={27} color={colors.red} /></View>
