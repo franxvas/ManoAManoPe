@@ -1,3 +1,4 @@
+import { ZonePicker } from "@/components/zone-picker";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -61,7 +62,7 @@ function DonationForm({ id, donation }: { id?: string; donation?: Donation }) {
         <FormField label="Detalles (opcional)" value={description} onChangeText={setDescription} maxLength={1000} multiline placeholder="Medidas, color, si tiene algún detalle…" />
         <ChoiceChips label="Estado" options={conditionLabels} value={condition} onChange={setCondition} />
         <FormField label="Cantidad" value={quantity} onChangeText={setQuantity} keyboardType="number-pad" maxLength={3} />
-        <FormField label="Zona o barrio" value={zone} onChangeText={setZone} maxLength={80} placeholder="Ej. Centro de Bagua" />
+        <ZonePicker value={zone} onChange={setZone}/>
         <FormField label="Condiciones y horario de recojo" value={pickupTerms} onChangeText={setPickupTerms} maxLength={500} multiline placeholder="Ej. Se recoge por el centro, sábados de 9 a 12" />
         <PhotoPicker photos={photos} onChange={setPhotos} onError={setError} />
         {Boolean(error) && <Text accessibilityRole="alert" className="mb-3 font-sans text-sm text-brand">{error}</Text>}

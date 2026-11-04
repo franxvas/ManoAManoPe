@@ -1,3 +1,4 @@
+import { goBackOr } from "@/utils/navigation";
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -111,7 +112,7 @@ export default function EventDetail() {
               <PrimaryButton variant="secondary" label={`Ver inscritos (${event.registered_count})`} onPress={() => router.push({ pathname: '/comunidad/eventos/inscritos', params: { id: event.id } })} />
             )}
             <PrimaryButton variant="outline" label={isWorkshop ? 'Editar taller' : 'Editar evento'} onPress={() => router.push({ pathname: '/comunidad/eventos/nuevo', params: { id: event.id } })} />
-            <PrimaryButton variant="outline" label={isWorkshop ? 'Eliminar taller' : 'Eliminar evento'} disabled={action.busy} onPress={() => void action.run(() => deleteEvent(event.id)).then((ok) => ok && router.back())} />
+            <PrimaryButton variant="outline" label={isWorkshop ? 'Eliminar taller' : 'Eliminar evento'} disabled={action.busy} onPress={() => void action.run(() => deleteEvent(event.id)).then((ok) => ok && goBackOr('/(tabs)'))} />
           </View>
         )}
       </ScrollView>

@@ -1,3 +1,4 @@
+import { errorMessage } from '@/utils/errors';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
@@ -56,7 +57,7 @@ export default function WorkDetail() {
         ) : query.isError ? (
           <>
             <Text className="text-brand" accessibilityRole="alert">
-              {query.error.message}
+              {errorMessage(query.error)}
             </Text>
             <PrimaryButton
               label="Reintentar"

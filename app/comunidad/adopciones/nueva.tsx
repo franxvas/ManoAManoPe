@@ -1,3 +1,4 @@
+import { ZonePicker } from "@/components/zone-picker";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -66,7 +67,7 @@ function AdoptionForm({ id, adoption }: { id?: string; adoption?: Adoption }) {
         <FormField label="Descripción y comportamiento" value={description} onChangeText={setDescription} maxLength={2000} multiline placeholder="Cómo es, si convive con niños u otros animales…" />
         <FormField label="Cuidados y salud que conoces (opcional)" value={careInfo} onChangeText={setCareInfo} maxLength={1000} multiline placeholder="Vacunas, esterilización, alimentación…" />
         <FormField label="Condiciones de adopción" value={conditions} onChangeText={setConditions} maxLength={1000} multiline placeholder="Ej. Casa con espacio, compromiso de esterilizar" />
-        <FormField label="Zona o barrio" value={zone} onChangeText={setZone} maxLength={80} placeholder="Solo la zona, no tu dirección exacta" />
+        <ZonePicker value={zone} onChange={setZone}/>
         <PhotoPicker photos={photos} onChange={setPhotos} onError={setError} />
         {Boolean(error) && <Text accessibilityRole="alert" className="mb-3 font-sans text-sm text-brand">{error}</Text>}
         <PrimaryButton label={id ? 'Guardar cambios' : 'Publicar ficha'} loading={busy} onPress={() => void submit()} />

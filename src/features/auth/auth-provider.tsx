@@ -1,4 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
@@ -21,6 +22,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
+  const cache = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [accessMode, setAccessMode] = useState<'none' | 'guest' | 'demo'>('none');
@@ -63,10 +65,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (supabase) await supabase.auth.signOut();
+    if (supabase) { const {error}=await supabase.auth.signOut();if(error)throw error; }
+    cache.clear();
     setSession(null);
     setAccessMode('none');
-  }, []);
+  }, [cache]);
 
   const value = useMemo<AuthContextValue>(() => ({
     session, loading, isGuest: accessMode === 'guest', isAuthenticated: Boolean(session) || accessMode === 'demo', backendReady: isSupabaseConfigured,

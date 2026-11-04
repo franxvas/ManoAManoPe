@@ -1,3 +1,4 @@
+import { errorMessage } from '@/utils/errors';
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
@@ -53,7 +54,7 @@ export default function PortfolioList() {
       ) : query.isError ? (
         <View className="p-5 gap-3">
           <Text accessibilityRole="alert" className="text-brand">
-            No pudimos cargar el portafolio. {query.error.message}
+            No pudimos cargar el portafolio. {errorMessage(query.error)}
           </Text>
           <PrimaryButton
             label="Reintentar"

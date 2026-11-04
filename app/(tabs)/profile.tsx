@@ -1,59 +1,60 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { PrimaryButton } from '@/components/primary-button';
-import { isSupabaseConfigured } from '@/lib/supabase';
-import { TrustSummary } from '@/features/confianza/summary';
-import { Avatar } from '@/components/avatar';
-import { BrandLogo } from '@/components/brand-logo';
-import { colors } from '@/constants/theme';
-import { useAuth } from '@/features/auth/auth-provider';
-import { useListings } from '@/hooks/use-listings';
-import { useProfile } from '@/hooks/use-profile';
+import { PrimaryButton } from "@/components/primary-button";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { TrustSummary } from "@/features/confianza/summary";
+import { PublicReviews } from "@/features/confianza/reviews";
+import { Avatar } from "@/components/avatar";
+import { BrandLogo } from "@/components/brand-logo";
+import { colors } from "@/constants/theme";
+import { useAuth } from "@/features/auth/auth-provider";
+import { useListings } from "@/hooks/use-listings";
+import { useProfile } from "@/hooks/use-profile";
 
 const menuItems: {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   route:
-    | '/profile/edit'
-    | '/profile/my-listings'
-    | '/profile/favorites'
-    | '/profile/account'
-    | '/profile/notification-settings'
-    | '/profile/help';
+    | "/profile/edit"
+    | "/profile/my-listings"
+    | "/profile/favorites"
+    | "/profile/account"
+    | "/profile/notification-settings"
+    | "/profile/help";
 }[] = [
   {
-    label: 'Editar perfil',
-    icon: 'create-outline',
-    route: '/profile/edit',
+    label: "Editar perfil",
+    icon: "create-outline",
+    route: "/profile/edit",
   },
   {
-    label: 'Mis publicaciones',
-    icon: 'albums-outline',
-    route: '/profile/my-listings',
+    label: "Mis publicaciones",
+    icon: "albums-outline",
+    route: "/profile/my-listings",
   },
   {
-    label: 'Favoritos',
-    icon: 'heart-outline',
-    route: '/profile/favorites',
+    label: "Favoritos",
+    icon: "heart-outline",
+    route: "/profile/favorites",
   },
   {
-    label: 'Cuenta y seguridad',
-    icon: 'shield-checkmark-outline',
-    route: '/profile/account',
+    label: "Cuenta y seguridad",
+    icon: "shield-checkmark-outline",
+    route: "/profile/account",
   },
   {
-    label: 'Notificaciones',
-    icon: 'notifications-outline',
-    route: '/profile/notification-settings',
+    label: "Notificaciones",
+    icon: "notifications-outline",
+    route: "/profile/notification-settings",
   },
   {
-    label: 'Centro de ayuda',
-    icon: 'help-circle-outline',
-    route: '/profile/help',
+    label: "Centro de ayuda",
+    icon: "help-circle-outline",
+    route: "/profile/help",
   },
 ];
 
@@ -62,20 +63,14 @@ export default function ProfileScreen() {
 
   const { listings: allListings } = useListings();
 
-  const listings = allListings.filter(
-    (item) => item.ownerId === profile?.id
-  );
+  const listings = allListings.filter((item) => item.ownerId === profile?.id);
 
   const { signOut, isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-canvas px-6">
-        <Ionicons
-          name="person-circle-outline"
-          size={72}
-          color={colors.navy}
-        />
+        <Ionicons name="person-circle-outline" size={72} color={colors.navy} />
 
         <Text className="mt-4 font-display text-2xl text-navy">
           Tu perfil te está esperando
@@ -89,17 +84,15 @@ export default function ProfileScreen() {
         <Pressable
           onPress={() =>
             router.push({
-              pathname: '/(auth)/login',
+              pathname: "/(auth)/login",
               params: {
-                returnTo: '/(tabs)/profile',
+                returnTo: "/(tabs)/profile",
               },
             })
           }
           className="mt-6 rounded-2xl bg-brand px-8 py-4"
         >
-          <Text className="font-medium text-white">
-            Iniciar sesión
-          </Text>
+          <Text className="font-medium text-white">Iniciar sesión</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -120,9 +113,7 @@ export default function ProfileScreen() {
           onPress={() => void refresh()}
           className="mt-5 rounded-xl bg-brand px-6 py-3"
         >
-          <Text className="font-medium text-white">
-            Reintentar
-          </Text>
+          <Text className="font-medium text-white">Reintentar</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -131,29 +122,21 @@ export default function ProfileScreen() {
   if (!profile) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-canvas">
-        <Text className="font-medium text-navy">
-          Cargando perfil…
-        </Text>
+        <Text className="font-medium text-navy">Cargando perfil…</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView
-      edges={['top']}
-      className="flex-1 bg-canvas"
-    >
+    <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScrollView
         contentContainerClassName="pb-28"
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-5 py-3"><TrustSummary ownerId={profile.id}/><PrimaryButton label="Mi portafolio de trabajos" onPress={()=>router.push("/portafolio")}/></View>
         <View className="flex-row items-center justify-between bg-white px-5 pb-3 pt-2">
           <BrandLogo compact />
 
-          <Pressable
-            onPress={() => router.push('/notifications')}
-          >
+          <Pressable onPress={() => router.push("/notifications")}>
             <Ionicons
               name="notifications-outline"
               size={25}
@@ -183,7 +166,7 @@ export default function ProfileScreen() {
             </View>
 
             <Pressable
-              onPress={() => router.push('/profile/edit')}
+              onPress={() => router.push("/profile/edit")}
               className="mb-2 rounded-full border border-navy px-4 py-2"
             >
               <Text className="font-medium text-xs text-navy">
@@ -196,8 +179,6 @@ export default function ProfileScreen() {
             <Text className="font-display text-2xl text-navy">
               {profile.displayName}
             </Text>
-
-            
           </View>
 
           <Text className="mt-1 font-sans text-sm text-muted">
@@ -209,24 +190,31 @@ export default function ProfileScreen() {
           </Text>
 
           <View className="mt-5 flex-row rounded-2xl bg-canvas py-4">
-            <Stat
-              value={String(listings.length)}
-              label="Publicaciones"
-            />
+            <Stat value={String(listings.length)} label="Publicaciones" />
 
             <Stat
-              value={isSupabaseConfigured ? profile.ratingAverage.toFixed(1) : '—'}
+              value={
+                isSupabaseConfigured ? profile.ratingAverage.toFixed(1) : "—"
+              }
               label="Rating"
             />
 
             <Stat
-              value={isSupabaseConfigured ? String(profile.ratingCount) : '—'}
+              value={isSupabaseConfigured ? String(profile.ratingCount) : "—"}
               label="Reseñas"
               last
             />
           </View>
         </View>
 
+        <View className="px-5 py-3">
+          <TrustSummary ownerId={profile.id} />
+          <PrimaryButton
+            label="Mi portafolio de trabajos"
+            onPress={() => router.push("/portafolio")}
+          />
+          <PublicReviews ownerId={profile.id} />
+        </View>
         <View className="mt-3 bg-white px-5 py-2">
           {menuItems.map((item) => (
             <Pressable
@@ -234,37 +222,23 @@ export default function ProfileScreen() {
               onPress={() => router.push(item.route)}
               className="flex-row items-center border-t border-line py-4"
             >
-              <Ionicons
-                name={item.icon}
-                size={22}
-                color={colors.navy}
-              />
+              <Ionicons name={item.icon} size={22} color={colors.navy} />
 
               <Text className="ml-3 flex-1 font-medium text-sm text-ink">
                 {item.label}
               </Text>
 
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color={colors.muted}
-              />
+              <Ionicons name="chevron-forward" size={18} color={colors.muted} />
             </Pressable>
           ))}
 
           <Pressable
             onPress={() =>
-              void signOut().then(() =>
-                router.replace('/(auth)/welcome')
-              )
+              void signOut().then(() => router.replace("/(auth)/welcome"))
             }
             className="flex-row items-center border-t border-line py-4"
           >
-            <Ionicons
-              name="log-out-outline"
-              size={22}
-              color={colors.red}
-            />
+            <Ionicons name="log-out-outline" size={22} color={colors.red} />
 
             <Text className="ml-3 font-medium text-sm text-brand">
               Cerrar sesión
@@ -287,17 +261,11 @@ function Stat({
 }) {
   return (
     <View
-      className={`flex-1 items-center ${
-        last ? '' : 'border-r border-line'
-      }`}
+      className={`flex-1 items-center ${last ? "" : "border-r border-line"}`}
     >
-      <Text className="font-display text-xl text-navy">
-        {value}
-      </Text>
+      <Text className="font-display text-xl text-navy">{value}</Text>
 
-      <Text className="mt-1 font-sans text-[11px] text-muted">
-        {label}
-      </Text>
+      <Text className="mt-1 font-sans text-[11px] text-muted">{label}</Text>
     </View>
   );
 }

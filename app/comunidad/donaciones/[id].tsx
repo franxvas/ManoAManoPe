@@ -1,3 +1,4 @@
+import { goBackOr } from "@/utils/navigation";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -27,7 +28,7 @@ export default function DonationDetail() {
     try {
       await deleteDonation(id);
       await cache.invalidateQueries({ queryKey: ['donations'] });
-      router.back();
+      goBackOr('/(tabs)');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo eliminar.');
     }

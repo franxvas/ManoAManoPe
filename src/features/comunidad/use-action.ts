@@ -1,5 +1,6 @@
 import { useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { useState } from 'react';
+import { errorMessage } from '@/utils/errors';
 
 // Ejecuta una acción del servidor, muestra el error y refresca las consultas afectadas.
 export function useCommunityAction(keys: QueryKey[]) {
@@ -16,7 +17,7 @@ export function useCommunityAction(keys: QueryKey[]) {
       await Promise.all(keys.map((queryKey) => cache.invalidateQueries({ queryKey })));
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Algo salió mal, inténtalo otra vez.');
+      setError(errorMessage(e));
       return false;
     } finally {
       setBusy(false);

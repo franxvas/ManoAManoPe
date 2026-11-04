@@ -1,10 +1,14 @@
-import { goBackOr } from '@/utils/navigation';
-import { budgetLabel } from './money';
-import { nearby, type ApproximateArea } from './area';
-import { AreaPicker, NearbyFilter } from './area-picker';
-import { useCallback, useEffect, useState } from 'react';
-import { router, useLocalSearchParams } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
+import { readImage } from "@/services/images";
+import { goBackOr } from "@/utils/navigation";
+import { ScreenHeader } from "@/components/screen-header";
+import { PeruLocationPicker } from "@/components/peru-location-picker";
+import { errorMessage } from "@/utils/errors";
+import { budgetLabel } from "./money";
+import { nearby, type ApproximateArea } from "./area";
+import { AreaPicker, NearbyFilter } from "./area-picker";
+import { useCallback, useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import {
   Alert,
   Image,
@@ -13,22 +17,22 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '@/features/auth/auth-provider';
-import { supabase } from '@/lib/supabase';
-import * as api from './api';
-import { TaskEditor } from './task-editor';
-import { validateRequest } from './validation';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "@/features/auth/auth-provider";
+import { supabase } from "@/lib/supabase";
+import * as api from "./api";
+import { TaskEditor } from "./task-editor";
+import { validateRequest } from "./validation";
 
 const card = {
-  backgroundColor: '#fff',
+  backgroundColor: "#fff",
   padding: 16,
   borderRadius: 16,
   marginVertical: 8,
 } as const;
 const field = {
-  borderColor: '#d1d5db',
+  borderColor: "#d1d5db",
   borderWidth: 1,
   borderRadius: 10,
   padding: 10,
@@ -40,13 +44,13 @@ function Button({ text, onPress }: { text: string; onPress: () => void }) {
     <Pressable
       onPress={onPress}
       style={{
-        backgroundColor: '#0b2d5d',
+        backgroundColor: "#0b2d5d",
         borderRadius: 10,
         padding: 12,
         marginVertical: 4,
       }}
     >
-      <Text style={{ color: 'white', textAlign: 'center', fontWeight: '700' }}>
+      <Text style={{ color: "white", textAlign: "center", fontWeight: "700" }}>
         {text}
       </Text>
     </Pressable>
@@ -67,7 +71,7 @@ function Field({
 }) {
   return (
     <View>
-      <Text style={{ fontWeight: '600', color: '#0b2d5d' }}>{label}</Text>
+      <Text style={{ fontWeight: "600", color: "#0b2d5d" }}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
         value={value}
@@ -76,7 +80,7 @@ function Field({
         multiline={multiline}
         style={[
           field,
-          multiline ? { minHeight: 90, textAlignVertical: 'top' } : {},
+          multiline ? { minHeight: 90, textAlignVertical: "top" } : {},
         ]}
       />
     </View>
@@ -94,8 +98,8 @@ function Choice<T extends string>({
   return (
     <View
       style={{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexDirection: "row",
+        flexWrap: "wrap",
         gap: 6,
         marginVertical: 8,
       }}
@@ -107,10 +111,10 @@ function Choice<T extends string>({
           style={{
             padding: 8,
             borderRadius: 12,
-            backgroundColor: value === x ? '#0b2d5d' : '#eaf0f8',
+            backgroundColor: value === x ? "#0b2d5d" : "#eaf0f8",
           }}
         >
-          <Text style={{ color: value === x ? 'white' : '#0b2d5d' }}>
+          <Text style={{ color: value === x ? "white" : "#0b2d5d" }}>
             {choiceLabel[x] ?? x}
           </Text>
         </Pressable>
@@ -119,41 +123,37 @@ function Choice<T extends string>({
   );
 }
 const choiceLabel: Record<string, string> = {
-  all: 'Todas',
-  help: 'Ayuda',
-  repair: 'Reparación',
-  project: 'Proyecto',
-  home: 'A domicilio',
-  worker_location: 'En el local',
-  remote: 'Remoto',
-  diagnosis: 'Diagnóstico',
-  estimate: 'Estimado',
-  fixed: 'Definido',
+  all: "Todas",
+  help: "Ayuda",
+  repair: "Reparación",
+  project: "Proyecto",
+  home: "A domicilio",
+  worker_location: "En el local",
+  remote: "Remoto",
+  diagnosis: "Diagnóstico",
+  estimate: "Estimado",
+  fixed: "Definido",
 };
 const labels = {
-  help: 'Ayuda',
-  repair: 'Reparación',
-  project: 'Proyecto',
+  help: "Ayuda",
+  repair: "Reparación",
+  project: "Proyecto",
 } as const;
 const states = {
-  open: 'Recibiendo propuestas',
-  in_progress: 'Trabajo en curso',
-  completion_requested: 'Esperando confirmación',
-  completed: 'Finalizada',
-  cancelled: 'Cancelada',
+  open: "Recibiendo propuestas",
+  in_progress: "Trabajo en curso",
+  completion_requested: "Esperando confirmación",
+  completed: "Finalizada",
+  cancelled: "Cancelada",
 } as const;
 function numberValue(v: string) {
   if (!v.trim()) return null;
   const n = Number(v);
-  if (!Number.isFinite(n) || n < 0) throw Error('Ingresa un importe válido.');
+  if (!Number.isFinite(n) || n < 0) throw Error("Ingresa un importe válido.");
   return n;
 }
 function errorText(e: unknown) {
-  return e instanceof Error
-    ? e.message
-    : typeof e === 'object' && e !== null && 'message' in e
-      ? String(e.message)
-      : 'Ocurrió un error.';
+  return errorMessage(e);
 }
 export function ManoRemote() {
   const { requestId, taskId } = useLocalSearchParams<{
@@ -165,58 +165,60 @@ export function ManoRemote() {
   const [searchArea, SetSearchArea] = useState<ApproximateArea | null>(null);
   const [radius, SetRadius] = useState<number | null>(null);
   const user = session?.user.id;
-  const [screen, show] = useState<'list' | 'form' | 'detail'>('list');
+  const [screen, show] = useState<"list" | "form" | "detail">("list");
   const [requests, setRequests] = useState<api.RequestRow[]>([]);
   const [current, setCurrent] = useState<api.RequestRow | null>(null);
   const [tasks, setTasks] = useState<api.TaskRow[]>([]);
   const [proposals, setProposals] = useState<api.ProposalRow[]>([]);
   const [task, setTask] = useState<api.TaskRow | null>(null);
   const [busy, setBusy] = useState(false);
-  const [filter, setFilter] = useState<'all' | api.Kind>('all');
-  const [query, Q] = useState('');
-  const [zone, Zone] = useState('');
-  const [kind, K] = useState<api.Kind>('help');
-  const [title, T] = useState('');
-  const [category, C] = useState('');
-  const [description, D] = useState('');
-  const [min, Min] = useState('');
-  const [max, Max] = useState('');
-  const [deadline, Deadline] = useState('');
-  const [modality, Mode] = useState<'home' | 'worker_location' | 'remote'>(
-    'home',
+  const [filter, setFilter] = useState<"all" | api.Kind>("all");
+  const [query, Q] = useState("");
+  const [zone, Zone] = useState("");
+  const [region, Region] = useState("");
+  const [filterRegion, FilterRegion] = useState("");
+  const [kind, K] = useState<api.Kind>("help");
+  const [title, T] = useState("");
+  const [category, C] = useState("");
+  const [description, D] = useState("");
+  const [min, Min] = useState("");
+  const [max, Max] = useState("");
+  const [deadline, Deadline] = useState("");
+  const [modality, Mode] = useState<"home" | "worker_location" | "remote">(
+    "home",
   );
-  const [location, L] = useState('');
-  const [item, I] = useState('');
-  const [brand, B] = useState('');
-  const [since, Since] = useState('');
-  const [transport, Tr] = useState('');
-  const [taskLines, TL] = useState('');
+  const [location, L] = useState("");
+  const [item, I] = useState("");
+  const [brand, B] = useState("");
+  const [since, Since] = useState("");
+  const [transport, Tr] = useState("");
+  const [taskLines, TL] = useState("");
   const [photos, Photos] = useState<ImagePicker.ImagePickerAsset[]>([]);
-  const [qkind, QK] = useState<api.QuoteKind>('fixed');
-  const [qmin, QM] = useState('');
-  const [qmax, QX] = useState('');
-  const [scope, S] = useState('');
-  const [duration, Du] = useState('');
-  const [start, St] = useState('');
-  const [materials, Ma] = useState('');
-  const [inspection, Ins] = useState('');
-  const [note, N] = useState('');
+  const [qkind, QK] = useState<api.QuoteKind>("fixed");
+  const [qmin, QM] = useState("");
+  const [qmax, QX] = useState("");
+  const [scope, S] = useState("");
+  const [duration, Du] = useState("");
+  const [start, St] = useState("");
+  const [materials, Ma] = useState("");
+  const [inspection, Ins] = useState("");
+  const [note, N] = useState("");
   const [revisions, SetRevisions] = useState<Record<string, api.RevisionRow[]>>(
     {},
   );
   const [messages, SetMessages] = useState<Record<string, api.MessageRow[]>>(
     {},
   );
-  const [message, Message] = useState('');
-  const [revision, Revision] = useState('');
-  const [revisionScope, RevisionScope] = useState('');
-  const [revisionMax, RevisionMax] = useState('');
-  const [error, SetError] = useState('');
-  const [rating, Rating] = useState('5');
-  const [comment, Comment] = useState('');
+  const [message, Message] = useState("");
+  const [revision, Revision] = useState("");
+  const [revisionScope, RevisionScope] = useState("");
+  const [revisionMax, RevisionMax] = useState("");
+  const [error, SetError] = useState("");
+  const [rating, Rating] = useState("5");
+  const [comment, Comment] = useState("");
   const run = useCallback(async (fn: () => Promise<void>) => {
     setBusy(true);
-    SetError('');
+    SetError("");
     try {
       await fn();
     } catch (e) {
@@ -246,7 +248,7 @@ export function ManoRemote() {
             setTasks(ts);
             setTask(chosen);
             setProposals(ps);
-            show('detail');
+            show("detail");
           }
         }
       })
@@ -262,7 +264,7 @@ export function ManoRemote() {
     const chosen = ts.find((x) => x.id === task?.id) ?? ts[0] ?? null;
     setTask(chosen);
     setProposals(chosen && user ? await api.getProposals(chosen.id) : []);
-    show('detail');
+    show("detail");
   }
   async function selectTask(t: api.TaskRow) {
     setTask(t);
@@ -271,7 +273,7 @@ export function ManoRemote() {
     SetMessages({});
   }
   async function create() {
-    if (!user) throw Error('Inicia sesión para publicar.');
+    if (!user) throw Error("Inicia sesión para publicar.");
     if (
       !title.trim() ||
       !category.trim() ||
@@ -279,29 +281,29 @@ export function ManoRemote() {
       !location.trim()
     )
       throw Error(
-        'Completa título, categoría, descripción y ubicación aproximada.',
+        "Completa título, categoría, descripción y ubicación aproximada.",
       );
     const lower = numberValue(min),
       upper = numberValue(max);
     if (lower !== null && upper !== null && lower > upper)
-      throw Error('El máximo debe ser mayor o igual al mínimo.');
+      throw Error("El máximo debe ser mayor o igual al mínimo.");
     const taskInputs =
-      kind === 'project'
+      kind === "project"
         ? taskLines
-            .split('\n')
+            .split("\n")
             .map((x) => x.trim())
             .filter(Boolean)
             .map((x) => {
-              const [name, budget] = x.split('|');
+              const [name, budget] = x.split("|");
               return {
-                title: name?.trim() || '',
-                budget_min: numberValue(budget?.trim() || ''),
-                budget_max: numberValue(budget?.trim() || ''),
+                title: name?.trim() || "",
+                budget_min: numberValue(budget?.trim() || ""),
+                budget_max: numberValue(budget?.trim() || ""),
               };
             })
         : [{ title: title.trim(), budget_min: lower, budget_max: upper }];
     if (!taskInputs.length || taskInputs.some((x) => !x.title))
-      throw Error('Agrega al menos una tarea.');
+      throw Error("Agrega al menos una tarea.");
     validateRequest(
       {
         kind,
@@ -323,18 +325,22 @@ export function ManoRemote() {
     const paths: string[] = [];
     try {
       for (const photo of photos) {
-        const ext = photo.mimeType === 'image/png' ? 'png' : 'jpg';
+        const {
+          buffer: bytes,
+          contentType,
+          extension: ext,
+        } = await readImage(photo.uri);
         const path = `${user}/mano/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const bytes = await (await fetch(photo.uri)).arrayBuffer();
+
         const { error } = await supabase!.storage
-          .from('listing-media')
-          .upload(path, bytes, { contentType: photo.mimeType || 'image/jpeg' });
+          .from("listing-media")
+          .upload(path, bytes, { contentType });
         if (error) throw error;
         paths.push(path);
       }
       const urls = paths.map(
         (path) =>
-          supabase!.storage.from('listing-media').getPublicUrl(path).data
+          supabase!.storage.from("listing-media").getPublicUrl(path).data
             .publicUrl,
       );
       await api.createRequest(
@@ -360,39 +366,39 @@ export function ManoRemote() {
       );
     } catch (e) {
       if (paths.length)
-        await supabase!.storage.from('listing-media').remove(paths);
+        await supabase!.storage.from("listing-media").remove(paths);
       throw e;
     }
     await load();
-    T('');
-    C('');
-    D('');
-    Min('');
-    Max('');
-    Deadline('');
-    L('');
-    I('');
-    B('');
-    Since('');
-    Tr('');
-    TL('');
+    T("");
+    C("");
+    D("");
+    Min("");
+    Max("");
+    Deadline("");
+    L("");
+    I("");
+    B("");
+    Since("");
+    Tr("");
+    TL("");
     Photos([]);
     SetRequestArea(null);
-    show('list');
+    show("list");
   }
   async function submit() {
     if (!task) return;
     if (!scope.trim() || !duration.trim() || !start.trim() || !materials.trim())
-      throw Error('Completa el alcance, tiempo, inicio y materiales.');
+      throw Error("Completa el alcance, tiempo, inicio y materiales.");
     const price = numberValue(qmin);
-    if (price === null) throw Error('Ingresa el precio.');
+    if (price === null) throw Error("Ingresa el precio.");
     const maximum = numberValue(qmax);
-    if (qkind === 'estimate' && (maximum === null || maximum < price))
-      throw Error('Indica un máximo válido para el rango.');
+    if (qkind === "estimate" && (maximum === null || maximum < price))
+      throw Error("Indica un máximo válido para el rango.");
     await api.submitProposal(task.id, {
       quote_kind: qkind,
       amount_min: price,
-      amount_max: qkind === 'estimate' ? maximum : null,
+      amount_max: qkind === "estimate" ? maximum : null,
       scope,
       duration,
       available_from: start,
@@ -401,7 +407,7 @@ export function ManoRemote() {
       note,
     });
     await selectTask(task);
-    Alert.alert('Listo', 'Propuesta enviada.');
+    Alert.alert("Listo", "Propuesta enviada.");
   }
   async function loadExtras(p: api.ProposalRow) {
     const [r, m] = await Promise.all([
@@ -412,63 +418,57 @@ export function ManoRemote() {
     SetMessages((v) => ({ ...v, [p.id]: m }));
   }
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f4f5f7' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f5f7" }}>
+      <ScreenHeader title="Necesito una mano" showBack onBack={()=>screen === "list" ? goBackOr("/(tabs)/publish") : show("list")} />
       <ScrollView
         contentContainerStyle={{
           padding: 20,
           maxWidth: 850,
-          width: '100%',
-          alignSelf: 'center',
+          width: "100%",
+          alignSelf: "center",
           paddingBottom: 70,
         }}
       >
-        <Pressable
-          onPress={() => (screen === 'list' ? goBackOr('/(tabs)/publish') : show('list'))}
-        >
-          <Text style={{ color: '#0b2d5d' }}>‹ Volver</Text>
-        </Pressable>
-        <Text
-          style={{
-            fontWeight: '800',
-            fontSize: 30,
-            color: '#0b2d5d',
-            marginVertical: 14,
-          }}
-        >
-          Necesito una mano
-        </Text>
+
         {busy && <Text>Procesando…</Text>}
         {!!error && (
           <Text
             accessibilityRole="alert"
-            style={{ color: '#b91c1c', padding: 12 }}
+            style={{ color: "#b91c1c", padding: 12 }}
           >
             {error}
           </Text>
         )}
-        {screen === 'list' && (
+        {screen === "list" && (
           <>
             <Field label="Buscar solicitud o categoría" value={query} set={Q} />
-            <Field label="Distrito o ciudad" value={zone} set={Zone} />
+            <PeruLocationPicker
+              region={filterRegion}
+              city={zone}
+              onChange={(r, c) => {
+                FilterRegion(r);
+                Zone(c);
+              }}
+            />
             <NearbyFilter
               origin={searchArea}
               onOrigin={SetSearchArea}
               radius={radius}
               onRadius={SetRadius}
             />
-            <Button text="Crear solicitud" onPress={() => show('form')} />
+            <Button text="Crear solicitud" onPress={() => show("form")} />
             <Choice
               value={filter}
-              options={['all', 'help', 'repair', 'project'] as const}
+              options={["all", "help", "repair", "project"] as const}
               onChange={setFilter}
             />
             {nearby(requests, searchArea, radius)
               .filter(
                 (r) =>
-                  (filter === 'all' || r.kind === filter) &&
+                  (filter === "all" || r.kind === filter) &&
                   (!query ||
                     [r.title, r.category, r.description]
-                      .join(' ')
+                      .join(" ")
                       .toLowerCase()
                       .includes(query.toLowerCase())) &&
                   (!zone ||
@@ -482,14 +482,14 @@ export function ManoRemote() {
                   style={card}
                   onPress={() => void run(() => details(r))}
                 >
-                  <Text style={{ color: '#d7192d' }}>
+                  <Text style={{ color: "#d7192d" }}>
                     {labels[r.kind]} · {r.category}
                   </Text>
                   <Text
                     style={{
                       fontSize: 20,
-                      fontWeight: '700',
-                      color: '#0b2d5d',
+                      fontWeight: "700",
+                      color: "#0b2d5d",
                     }}
                   >
                     {r.title}
@@ -498,18 +498,18 @@ export function ManoRemote() {
                     {r.approximate_location}
                     {r.distance != null
                       ? ` · ${r.distance.toFixed(1)} km aprox.`
-                      : ''}
+                      : ""}
                   </Text>
                 </Pressable>
               ))}
           </>
         )}
-        {screen === 'form' && (
+        {screen === "form" && (
           <View style={card}>
             <Text>Tipo de solicitud</Text>
             <Choice
               value={kind}
-              options={['help', 'repair', 'project'] as const}
+              options={["help", "repair", "project"] as const}
               onChange={K}
             />
             <Field label="Título" value={title} set={T} />
@@ -534,15 +534,18 @@ export function ManoRemote() {
             <Text>Modalidad</Text>
             <Choice
               value={modality}
-              options={['home', 'worker_location', 'remote'] as const}
+              options={["home", "worker_location", "remote"] as const}
               onChange={Mode}
             />
-            <Field
-              label="Ubicación aproximada (ciudad o distrito)"
-              value={location}
-              set={L}
+            <PeruLocationPicker
+              region={region}
+              city={location.split(",")[0] ?? ""}
+              onChange={(r, c) => {
+                Region(r);
+                L(c ? `${c}, ${r}` : "");
+              }}
             />
-            {kind === 'repair' && (
+            {kind === "repair" && (
               <>
                 <Field label="Qué reparar" value={item} set={I} />
                 <Field label="Marca y modelo" value={brand} set={B} />
@@ -554,14 +557,14 @@ export function ManoRemote() {
                 />
               </>
             )}
-            {kind === 'project' && (
+            {kind === "project" && (
               <TaskEditor value={taskLines} onChange={TL} />
             )}
             <Button
               text="Añadir fotografías"
               onPress={() => {
                 void ImagePicker.launchImageLibraryAsync({
-                  mediaTypes: ['images'],
+                  mediaTypes: ["images"],
                   allowsMultipleSelection: true,
                   quality: 0.7,
                 }).then((result) => {
@@ -572,9 +575,9 @@ export function ManoRemote() {
             <Text>{photos.length} fotografía(s) seleccionadas</Text>
             <Button
               text={
-                kind === 'repair'
-                  ? 'Solicitar reparación'
-                  : 'Publicar solicitud'
+                kind === "repair"
+                  ? "Solicitar reparación"
+                  : "Publicar solicitud"
               }
               onPress={() => {
                 if (!busy) void run(create);
@@ -582,32 +585,32 @@ export function ManoRemote() {
             />
           </View>
         )}
-        {screen === 'detail' && current && (
+        {screen === "detail" && current && (
           <>
             <View style={card}>
-              <Text style={{ color: '#d7192d' }}>
+              <Text style={{ color: "#d7192d" }}>
                 {labels[current.kind]} · {current.category}
               </Text>
               <Text
-                style={{ fontSize: 24, fontWeight: '700', color: '#0b2d5d' }}
+                style={{ fontSize: 24, fontWeight: "700", color: "#0b2d5d" }}
               >
                 {current.title}
               </Text>
               <Text>{current.description}</Text>
               <Text>
-                Presupuesto disponible:{' '}
+                Presupuesto disponible:{" "}
                 {budgetLabel(current.budget_min, current.budget_max)}
               </Text>
               <Text>Ubicación aproximada: {current.approximate_location}</Text>
-              {current.kind === 'repair' && (
+              {current.kind === "repair" && (
                 <Text>
-                  Objeto: {current.repair_item || 'No indicado'} · Modelo:{' '}
-                  {current.brand_model || 'No indicado'} · Desde:{' '}
-                  {current.problem_since || 'No indicado'} · Traslado:{' '}
-                  {current.transport || 'No indicado'}
+                  Objeto: {current.repair_item || "No indicado"} · Modelo:{" "}
+                  {current.brand_model || "No indicado"} · Desde:{" "}
+                  {current.problem_since || "No indicado"} · Traslado:{" "}
+                  {current.transport || "No indicado"}
                 </Text>
               )}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                 {current.photos?.map((uri) => (
                   <Image
                     key={uri}
@@ -623,7 +626,7 @@ export function ManoRemote() {
               </View>
             </View>
             <View style={card}>
-              <Text style={{ fontWeight: '700' }}>Tareas y estado</Text>
+              <Text style={{ fontWeight: "700" }}>Tareas y estado</Text>
               {tasks.map((t) => (
                 <Pressable
                   key={t.id}
@@ -632,51 +635,51 @@ export function ManoRemote() {
                   <Text
                     style={{
                       padding: 8,
-                      color: task?.id === t.id ? '#d7192d' : '#0b2d5d',
+                      color: task?.id === t.id ? "#d7192d" : "#0b2d5d",
                     }}
                   >
-                    {t.title} · {states[t.status]} ·{' '}
+                    {t.title} · {states[t.status]} ·{" "}
                     {budgetLabel(t.budget_min, t.budget_max)}
                   </Text>
                 </Pressable>
               ))}
-              {current.kind === 'project' && (
+              {current.kind === "project" && (
                 <Text>
                   {tasks.length > 0 &&
                   tasks.every(
-                    (t) => t.status === 'completed' || t.status === 'cancelled',
+                    (t) => t.status === "completed" || t.status === "cancelled",
                   )
-                    ? 'Proyecto terminado'
-                    : 'Proyecto en curso'}
+                    ? "Proyecto terminado"
+                    : "Proyecto en curso"}
                 </Text>
               )}
             </View>
             {task &&
               user &&
               current.owner_id !== user &&
-              task.status === 'open' && (
+              task.status === "open" && (
                 <View style={card}>
-                  <Text style={{ fontWeight: '700' }}>
-                    {current.kind === 'repair'
-                      ? 'Enviar presupuesto'
-                      : 'Enviar propuesta'}
+                  <Text style={{ fontWeight: "700" }}>
+                    {current.kind === "repair"
+                      ? "Enviar presupuesto"
+                      : "Enviar propuesta"}
                   </Text>
-                  {current.kind === 'repair' && (
+                  {current.kind === "repair" && (
                     <Choice
                       value={qkind}
-                      options={['diagnosis', 'estimate', 'fixed'] as const}
+                      options={["diagnosis", "estimate", "fixed"] as const}
                       onChange={QK}
                     />
                   )}
-                  <Text style={{ color: '#6b7280', marginBottom: 8 }}>
-                    {qkind === 'diagnosis'
-                      ? 'La revisión tiene su propio costo; el precio de reparación se confirma después.'
-                      : qkind === 'estimate'
-                        ? 'El rango es estimado y está sujeto a revisión.'
-                        : 'El precio definido incluye únicamente el alcance y los materiales indicados.'}
+                  <Text style={{ color: "#6b7280", marginBottom: 8 }}>
+                    {qkind === "diagnosis"
+                      ? "La revisión tiene su propio costo; el precio de reparación se confirma después."
+                      : qkind === "estimate"
+                        ? "El rango es estimado y está sujeto a revisión."
+                        : "El precio definido incluye únicamente el alcance y los materiales indicados."}
                   </Text>
                   <Field label="Precio mínimo (S/)" value={qmin} set={QM} />
-                  {qkind === 'estimate' && (
+                  {qkind === "estimate" && (
                     <Field label="Precio máximo (S/)" value={qmax} set={QX} />
                   )}
                   <Field label="Qué incluye" value={scope} set={S} />
@@ -691,7 +694,7 @@ export function ManoRemote() {
                     value={materials}
                     set={Ma}
                   />
-                  {current.kind === 'repair' && (
+                  {current.kind === "repair" && (
                     <Field
                       label="Costo de revisión (S/), opcional"
                       value={inspection}
@@ -701,9 +704,9 @@ export function ManoRemote() {
                   <Field label="Observación" value={note} set={N} />
                   <Button
                     text={
-                      current.kind === 'repair'
-                        ? 'Enviar presupuesto'
-                        : 'Enviar propuesta'
+                      current.kind === "repair"
+                        ? "Enviar presupuesto"
+                        : "Enviar propuesta"
                     }
                     onPress={() => void run(submit)}
                   />
@@ -711,16 +714,16 @@ export function ManoRemote() {
               )}
             {task && (
               <View style={card}>
-                <Text style={{ fontWeight: '700' }}>
-                  Propuestas{' '}
-                  {current.owner_id === user ? 'recibidas' : 'propias'}
+                <Text style={{ fontWeight: "700" }}>
+                  Propuestas{" "}
+                  {current.owner_id === user ? "recibidas" : "propias"}
                 </Text>
                 {!user && <Text>Inicia sesión para ver tus propuestas.</Text>}
                 {proposals.map((p) => (
                   <View
                     key={p.id}
                     style={{
-                      borderColor: '#ddd',
+                      borderColor: "#ddd",
                       borderWidth: 1,
                       borderRadius: 10,
                       padding: 12,
@@ -730,47 +733,47 @@ export function ManoRemote() {
                     <Pressable
                       onPress={() =>
                         router.push({
-                          pathname: '/profile/[id]',
+                          pathname: "/profile/[id]",
                           params: { id: p.worker_id },
                         })
                       }
                     >
-                      <Text style={{ fontWeight: '700' }}>
-                        {p.profile?.display_name || 'Trabajador'} ·{' '}
-                        {p.profile?.profession || 'Perfil'} ·{' '}
+                      <Text style={{ fontWeight: "700" }}>
+                        {p.profile?.display_name || "Trabajador"} ·{" "}
+                        {p.profile?.profession || "Perfil"} ·{" "}
                         {p.profile?.rating_average ?? 0} ★ · Ver perfil
                       </Text>
                     </Pressable>
                     <Text>
-                      {p.quote_kind === 'diagnosis'
-                        ? 'Diagnóstico'
-                        : p.quote_kind === 'estimate'
-                          ? 'Estimado sujeto a revisión'
-                          : 'Definido'}
+                      {p.quote_kind === "diagnosis"
+                        ? "Diagnóstico"
+                        : p.quote_kind === "estimate"
+                          ? "Estimado sujeto a revisión"
+                          : "Definido"}
                       : S/ {p.amount_min}
-                      {p.amount_max != null ? ` – ${p.amount_max}` : ''}
+                      {p.amount_max != null ? ` – ${p.amount_max}` : ""}
                     </Text>
                     <Text>Alcance: {p.scope}</Text>
                     <Text>
                       Tiempo: {p.duration} · Inicio: {p.available_from}
                     </Text>
                     <Text>
-                      Materiales: {p.materials} · Revisión:{' '}
+                      Materiales: {p.materials} · Revisión:{" "}
                       {p.inspection_cost == null
-                        ? 'No indicado'
+                        ? "No indicado"
                         : `S/ ${p.inspection_cost}`}
                     </Text>
                     <Text>{p.note}</Text>
                     <Text>Estado: {p.status}</Text>
                     {current.owner_id === user &&
-                      p.status === 'pending' &&
-                      task.status === 'open' && (
+                      p.status === "pending" &&
+                      task.status === "open" && (
                         <>
                           <Button
                             text={
-                              current.kind === 'repair'
-                                ? 'Aceptar presupuesto'
-                                : 'Aceptar propuesta'
+                              current.kind === "repair"
+                                ? "Aceptar presupuesto"
+                                : "Aceptar propuesta"
                             }
                             onPress={() =>
                               void run(async () => {
@@ -792,8 +795,8 @@ export function ManoRemote() {
                       )}
                     <>
                       {p.worker_id === user &&
-                        p.status === 'pending' &&
-                        task.status === 'open' && (
+                        p.status === "pending" &&
+                        task.status === "open" && (
                           <Button
                             text="Editar mi propuesta"
                             onPress={() => {
@@ -801,7 +804,7 @@ export function ManoRemote() {
                               QM(String(p.amount_min));
                               QX(
                                 p.amount_max == null
-                                  ? ''
+                                  ? ""
                                   : String(p.amount_max),
                               );
                               S(p.scope);
@@ -810,12 +813,12 @@ export function ManoRemote() {
                               Ma(p.materials);
                               Ins(
                                 p.inspection_cost == null
-                                  ? ''
+                                  ? ""
                                   : String(p.inspection_cost),
                               );
                               N(p.note);
                               SetError(
-                                'Edita los campos del formulario y envía para actualizar tu propuesta.',
+                                "Edita los campos del formulario y envía para actualizar tu propuesta.",
                               );
                             }}
                           />
@@ -827,12 +830,12 @@ export function ManoRemote() {
                     />
                     {messages[p.id] && (
                       <>
-                        <Text style={{ fontWeight: '700' }}>
+                        <Text style={{ fontWeight: "700" }}>
                           Conversación vinculada a esta solicitud
                         </Text>
                         {messages[p.id]?.map((m) => (
                           <Text key={m.id}>
-                            {m.sender_id === user ? 'Tú' : 'Otra persona'}:{' '}
+                            {m.sender_id === user ? "Tú" : "Otra persona"}:{" "}
                             {m.body}
                           </Text>
                         ))}
@@ -843,7 +846,7 @@ export function ManoRemote() {
                             void run(async () => {
                               if (!user || !message.trim()) return;
                               await api.sendMessage(p.id, user, message.trim());
-                              Message('');
+                              Message("");
                               await loadExtras(p);
                             })
                           }
@@ -853,12 +856,12 @@ export function ManoRemote() {
                     {revisions[p.id]?.map((r) => (
                       <View key={r.id}>
                         <Text>
-                          Actualización: S/ {r.amount_min}{' '}
-                          {r.amount_max != null ? `– ${r.amount_max}` : ''} ·{' '}
+                          Actualización: S/ {r.amount_min}{" "}
+                          {r.amount_max != null ? `– ${r.amount_max}` : ""} ·{" "}
                           {r.scope} · {r.status}
                         </Text>
                         {current.owner_id === user &&
-                          r.status === 'pending' && (
+                          r.status === "pending" && (
                             <>
                               <Button
                                 text="Aceptar actualización"
@@ -884,8 +887,8 @@ export function ManoRemote() {
                       </View>
                     ))}
                     {p.worker_id === user &&
-                      p.status === 'accepted' &&
-                      task.status === 'in_progress' && (
+                      p.status === "accepted" &&
+                      task.status === "in_progress" && (
                         <>
                           <Field
                             label="Nuevo precio propuesto (S/)"
@@ -908,10 +911,10 @@ export function ManoRemote() {
                               void run(async () => {
                                 const amount = numberValue(revision);
                                 if (amount === null)
-                                  throw Error('Indica el nuevo precio');
+                                  throw Error("Indica el nuevo precio");
                                 if (!revisionScope.trim())
                                   throw Error(
-                                    'Explica el alcance y motivo del cambio',
+                                    "Explica el alcance y motivo del cambio",
                                   );
                                 await api.reviseQuote(
                                   p.id,
@@ -919,7 +922,7 @@ export function ManoRemote() {
                                   numberValue(revisionMax),
                                   revisionScope.trim(),
                                 );
-                                Revision('');
+                                Revision("");
                                 await loadExtras(p);
                               })
                             }
@@ -930,7 +933,7 @@ export function ManoRemote() {
                               void run(async () => {
                                 await api.changeTask(
                                   task.id,
-                                  'request_completion',
+                                  "request_completion",
                                 );
                                 await details(current);
                               })
@@ -939,15 +942,15 @@ export function ManoRemote() {
                         </>
                       )}
                     {current.owner_id === user &&
-                      p.status === 'accepted' &&
-                      task.status === 'completion_requested' && (
+                      p.status === "accepted" &&
+                      task.status === "completion_requested" && (
                         <Button
                           text="Confirmar finalización"
                           onPress={() =>
                             void run(async () => {
                               await api.changeTask(
                                 task.id,
-                                'confirm_completion',
+                                "confirm_completion",
                               );
                               await details(current);
                             })
@@ -958,20 +961,20 @@ export function ManoRemote() {
                 ))}
               </View>
             )}
-            {task && current.owner_id === user && task.status === 'open' && (
+            {task && current.owner_id === user && task.status === "open" && (
               <Button
                 text="Cancelar tarea"
                 onPress={() =>
                   void run(async () => {
-                    await api.changeTask(task.id, 'cancel');
+                    await api.changeTask(task.id, "cancel");
                     await details(current);
                   })
                 }
               />
-            )}{' '}
+            )}{" "}
             {task &&
               current.owner_id === user &&
-              task.status === 'completed' && (
+              task.status === "completed" && (
                 <View style={card}>
                   <Text>Calificar trabajo</Text>
                   <Field
@@ -989,7 +992,7 @@ export function ManoRemote() {
                           Number(rating),
                           comment,
                         );
-                        Alert.alert('Gracias', 'Calificación enviada.');
+                        Alert.alert("Gracias", "Calificación enviada.");
                       })
                     }
                   />
