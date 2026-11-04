@@ -1,16 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { readCache, writeCache } from '@/features/offline/cache';
+
 
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { fetchListings } from '@/services/listings';
 import { useAppStore } from '@/stores/app-store';
-import type { ListingType } from '@/types/domain';
+import type { Listing, ListingType } from '@/types/domain';
 
 export function useListings(query = '', type?: ListingType, enabled = true) {
+  const [cached, setCached] = useState(false);
   const localListings = useAppStore((state) => state.listings);
   const remote = useQuery({
     queryKey: ['listings', query, type],
-    queryFn: () => fetchListings({ query, type }),
+    queryFn: async () => {
+      const key = `listing-cache:${query}:${type ?? 'all'}`;
+      try { const rows = await fetchListings({ query, type }); setCached(false); await writeCache(key, rows).catch(() => {}); return rows; }
+      catch (error) { const rows = await readCache<Listing[]>(key); if (rows) { setCached(true); return rows; } throw error; }
+    },
     enabled: isSupabaseConfigured && enabled,
   });
   const local = useMemo(() => {
@@ -22,6 +29,7 @@ export function useListings(query = '', type?: ListingType, enabled = true) {
   }, [localListings, query, type]);
 
   return {
+    cached,
     listings: isSupabaseConfigured ? (remote.data ?? []) : local,
     isLoading: isSupabaseConfigured && remote.isLoading,
     isError: remote.isError,

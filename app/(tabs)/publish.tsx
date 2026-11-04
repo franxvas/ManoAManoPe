@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import { CommunityShortcuts } from '@/components/community-shortcuts';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/primary-button';
@@ -19,7 +20,7 @@ export default function PublishChoiceScreen() {
   const { isAuthenticated } = useAuth();
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
-      <View className="flex-1 px-5 pt-5">
+      <ScrollView contentContainerClassName="px-5 pt-5 pb-12">
       <Text className="font-display text-3xl text-navy">¿Qué quieres publicar?</Text>
       <Text className="mt-2 font-sans text-base text-muted">Elige una opción para empezar</Text>
       <Pressable onPress={() => router.push('/mano' as Href)} className="mt-5 rounded-2xl bg-white p-4"><Text className="font-display text-xl text-navy">Necesito una mano →</Text><Text className="mt-1 font-sans text-sm text-muted">Solicitudes, reparaciones y proyectos · vista previa</Text></Pressable>
@@ -42,7 +43,8 @@ export default function PublishChoiceScreen() {
           ))}
         </View>
       )}
-      </View>
+      <CommunityShortcuts />
+      </ScrollView>
     </SafeAreaView>
   );
 }

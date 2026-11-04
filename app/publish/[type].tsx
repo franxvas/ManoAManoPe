@@ -21,6 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { Avatar } from '@/components/avatar';
+import { DraftControls } from '@/features/offline/draft-controls';
 import { EmptyState } from '@/components/empty-state';
 import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
@@ -302,6 +303,8 @@ function PublishFormContent({
     control,
     handleSubmit,
     setValue,
+    getValues,
+    reset,
     formState: {
       errors,
       isSubmitting,
@@ -913,6 +916,7 @@ function PublishFormContent({
           contentContainerClassName="px-5 pb-12 pt-5"
           keyboardShouldPersistTaps="handled"
         >
+          {!existing && <DraftControls cacheKey={`publish-draft:${profile.id}:${type}`} values={getValues} restore={reset} />}
           <Section
             title="Fotos"
             subtitle={`${photos.length}/6 · La primera será la portada`}

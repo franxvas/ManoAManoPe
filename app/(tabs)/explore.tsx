@@ -14,15 +14,21 @@ import { colors } from '@/constants/theme';
 import { demoCategories } from '@/constants/demo';
 import { useDeviceLocation } from '@/features/location/location-provider';
 import { useNearbyListings } from '@/hooks/use-nearby-listings';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { fetchCategories } from '@/services/listings';
 import type { Listing, ListingType } from '@/types/domain';
 import { getListingAmount } from '@/utils/format';
+
+import { useAuth } from '@/features/auth/auth-provider';
+import { errorMessage } from '@/utils/errors';
 
 const BAGUA_REGION: MapRegion = { latitude: -5.6395, longitude: -78.5325, latitudeDelta: 0.045, longitudeDelta: 0.045 };
 const filters: { label: string; value?: ListingType }[] = [{ label: 'Todos' }, { label: 'Productos', value: 'product' }, { label: 'Servicios', value: 'service' }, { label: 'Promos', value: 'promotion' }, { label: 'Necesidades', value: 'need' }];
 
 export default function ExploreScreen() {
+  const { session } = useAuth();
+  const [notice, setNotice] = useState('');
+  const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState('');
   const [type, setType] = useState<ListingType>();
   const [selected, setSelected] = useState<Listing>();
@@ -51,6 +57,13 @@ export default function ExploreScreen() {
   }, [coordinates]);
 
   const askForLocation = () => void (canAskAgain ? requestLocation() : openLocationSettings());
+  const saveSearch = async () => {
+    if (!session) { router.push({ pathname: '/(auth)/login', params: { returnTo: '/(tabs)/explore' } }); return; }
+    if (!searchCenter) { setNotice('Activa tu ubicación para guardar una zona de búsqueda.'); return; }
+    setSaving(true); setNotice('');
+    try { const { error } = await supabase!.from('saved_searches').insert({ owner_id: session.user.id, query: query.trim(), listing_type: type ?? null, category_id: categoryId ?? null, max_price: maxPrice ?? null, ...searchCenter, radius_km: radiusKm }); if(error) throw error; setNotice('Búsqueda guardada. Puedes revisarla en Mis alertas.'); }
+    catch(e){setNotice(errorMessage(e));}finally{setSaving(false);}
+  };
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-white">
@@ -58,6 +71,8 @@ export default function ExploreScreen() {
         <Text className="font-display text-3xl text-navy">Explora cerca de ti</Text>
         <Text className="mb-4 mt-1 font-sans text-sm text-muted">Descubre lo que ofrece tu comunidad</Text>
         <SearchBar value={query} onChangeText={setQuery} placeholder="Buscar en el mapa..." />
+        <Pressable disabled={saving} onPress={()=>void saveSearch()} className="mt-3"><Text className="font-medium text-brand">{saving?'Guardando…':'Guardar búsqueda y recibir coincidencias'}</Text></Pressable>
+        {!!notice&&<Text accessibilityRole="alert" className="mt-2 text-sm text-navy">{notice}</Text>}
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerClassName="gap-2 px-5 pb-3">
         {filters.map((filter) => {

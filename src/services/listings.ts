@@ -1,6 +1,7 @@
 import { demoCategories, demoListings } from '@/constants/demo';
 import { supabase } from '@/lib/supabase';
 import type { Category, Listing, ListingType } from '@/types/domain';
+import { readCache, writeCache } from '@/features/offline/cache';
 
 interface ListingFilters {
   query?: string;
@@ -59,8 +60,13 @@ export function getDistanceMeters(latitude: number, longitude: number, targetLat
 export async function fetchListing(id: string): Promise<Listing | null> {
   if (!supabase) return demoListings.find((listing) => listing.id === id) ?? null;
   const { data, error } = await supabase.from('listing_feed').select('*').eq('id', id).maybeSingle();
-  if (error) throw error;
-  return data ? mapListingRow(data) : null;
+  if (error) {
+    if (/fetch|network/i.test(error.message)) { const cached = await readCache<Listing>(`listing-detail:${id}`); if(cached) return cached; }
+    throw error;
+  }
+  const listing = data ? mapListingRow(data) : null;
+  await writeCache(`listing-detail:${id}`,listing).catch(()=>{});
+  return listing;
 }
 
 export async function fetchMyListings(): Promise<Listing[]> {

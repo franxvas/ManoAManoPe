@@ -15,13 +15,13 @@ export function ScreenHeader({ title, showBack = false, backFallback = '/(tabs)'
   const unread = notifications.filter((item) => !item.read).length;
   return (
     <View className="flex-row items-center justify-between bg-white px-5 pb-3 pt-2">
-      <View className="flex-row items-center">
+      <View className="min-w-0 flex-1 flex-row items-center pr-2">
         {showBack && (
           <Pressable onPress={() => goBackOr(backFallback)} className="mr-3 h-11 w-11 items-center justify-center rounded-full bg-canvas" accessibilityLabel="Volver">
             <Ionicons name="arrow-back" size={23} color={colors.navy} />
           </Pressable>
         )}
-        {title ? <Text className="font-display text-2xl text-navy">{title}</Text> : <BrandLogo compact />}
+        {title ? <Text numberOfLines={2} className="flex-1 font-display text-xl text-navy">{title}</Text> : <BrandLogo compact />}
       </View>
       <View className="flex-row items-center gap-3">
         <Pressable onPress={() => router.push('/notifications')} className="relative h-11 w-11 items-center justify-center rounded-full bg-canvas" accessibilityLabel="Notificaciones">

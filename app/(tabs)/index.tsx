@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '@/components/empty-state';
 import { ListingCard } from '@/components/listing-card';
 import { ScreenHeader } from '@/components/screen-header';
+import { CommunityShortcuts } from '@/components/community-shortcuts';
 import { SearchBar } from '@/components/search-bar';
 import { colors } from '@/constants/theme';
 import { useDeviceLocation } from '@/features/location/location-provider';
@@ -27,7 +28,7 @@ const quickLinks: { type?: ListingType; label: string; icon: keyof typeof Ionico
 export default function HomeScreen() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState<ListingType>();
-  const { listings, isLoading, isError, refresh } = useListings(query, type);
+  const { listings, isLoading, isError, refresh, cached } = useListings(query, type);
   const { coordinates, permissionStatus, canAskAgain, isLocating, error: locationError, requestLocation, openLocationSettings } = useDeviceLocation();
   const nearby = useNearbyListings(coordinates, 15, type);
   const featured = useMemo(() => listings.slice(0, 4), [listings]);
@@ -37,6 +38,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
       <ScreenHeader />
+      <CommunityShortcuts />
+      {cached&&<Text className="bg-amber-50 px-5 py-2 text-sm text-navy">Sin conexión con el servidor. Mostramos contenido guardado que puede haber cambiado.</Text>}
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={() => void refresh()} tintColor={colors.red} />}
