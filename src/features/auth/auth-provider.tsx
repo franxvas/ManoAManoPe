@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
@@ -29,11 +30,24 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!supabase) return;
+
+    // Carga la sesión inicial desde el storage local
     void supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
     });
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
+
+    // Escucha cambios de sesión incluyendo PASSWORD_RECOVERY
+    const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      setSession(nextSession);
+      // Cuando Supabase procesa el deep-link de reset-password,
+      // emite PASSWORD_RECOVERY con una sesión temporal. Redirigimos
+      // al usuario a la pantalla de nueva contraseña.
+      if (event === 'PASSWORD_RECOVERY') {
+        router.replace('/(auth)/reset-password');
+      }
+    });
+
     return () => data.subscription.unsubscribe();
   }, []);
 
