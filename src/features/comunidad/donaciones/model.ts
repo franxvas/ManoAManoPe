@@ -6,6 +6,7 @@ export interface Donation {
   id: string;
   owner_id: string;
   owner_name: string;
+  owner_avatar: string | null;
   title: string;
   description: string;
   condition: keyof typeof conditionLabels;

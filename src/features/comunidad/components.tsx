@@ -1,10 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { useState, type ReactNode } from 'react';
 import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { colors } from '@/constants/theme';
 import { photoUrl } from './api';
+import { sections, type SectionKey } from './theme';
 import type { Tone } from './types';
 
 export type Photo = { uri: string; path?: string };
@@ -91,12 +94,73 @@ export function PhotoPicker({ photos, onChange, onError, max = 6, label = 'Fotog
 
 export function PhotoGallery({ paths }: { paths: string[] }) {
   const { width } = useWindowDimensions();
+  const [index, setIndex] = useState(0);
   return (
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} className="bg-navy">
-      {paths.map((path) => (
-        <Image key={path} source={{ uri: photoUrl(path) }} style={{ width, height: 280 }} contentFit="cover" />
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={32}
+        onScroll={(event) => setIndex(Math.round(event.nativeEvent.contentOffset.x / width))}
+        className="bg-navy"
+      >
+        {paths.map((path) => (
+          <Image key={path} source={{ uri: photoUrl(path) }} style={{ width, height: 300 }} contentFit="cover" transition={150} />
+        ))}
+      </ScrollView>
+      {paths.length > 1 && (
+        <View className="absolute bottom-10 w-full flex-row justify-center gap-1.5">
+          {paths.map((path, i) => (
+            <View key={path} className={`h-2 rounded-full ${i === index ? 'w-5 bg-white' : 'w-2 bg-white/60'}`} />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+// Hoja blanca que se monta sobre la foto en los detalles.
+export function DetailSheet({ children }: { children: ReactNode }) {
+  return <View className="-mt-6 rounded-t-3xl bg-white p-5">{children}</View>;
+}
+
+export function QuickFacts({ facts, color }: { facts: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }[]; color: string }) {
+  return (
+    <View className="mt-4 flex-row gap-2">
+      {facts.map((fact) => (
+        <View key={fact.label} className="flex-1 items-center rounded-2xl bg-canvas px-2 py-3">
+          <Ionicons name={fact.icon} size={20} color={color} />
+          <Text numberOfLines={1} className="mt-1 font-medium text-sm text-ink">{fact.value}</Text>
+          <Text className="font-sans text-[11px] text-muted">{fact.label}</Text>
+        </View>
       ))}
-    </ScrollView>
+    </View>
+  );
+}
+
+export function OwnerCard({ name, avatar, label }: { name: string; avatar?: string | null; label: string }) {
+  return (
+    <View className="mt-4 flex-row items-center rounded-2xl bg-canvas p-3">
+      <View className="h-11 w-11 rounded-full bg-line">
+        <Avatar uri={avatar ?? undefined} name={name} size={44} />
+      </View>
+      <View className="ml-3 flex-1">
+        <Text className="font-sans text-xs text-muted">{label}</Text>
+        <Text className="font-medium text-ink">{name}</Text>
+      </View>
+      <Ionicons name="shield-checkmark-outline" size={18} color={colors.success} />
+    </View>
+  );
+}
+
+export function ActionFeedback({ error, notice }: { error: string; notice: string }) {
+  if (!error && !notice) return null;
+  return (
+    <View accessibilityRole="alert" className={`mt-3 flex-row items-center rounded-2xl px-4 py-3 ${error ? 'bg-red-50' : 'bg-green-50'}`}>
+      <Ionicons name={error ? 'alert-circle' : 'checkmark-circle'} size={18} color={error ? colors.red : colors.success} />
+      <Text className={`ml-2 flex-1 font-medium text-sm ${error ? 'text-brand' : 'text-success'}`}>{error || notice}</Text>
+    </View>
   );
 }
 
@@ -113,23 +177,79 @@ export function InfoRow({ icon, label, value }: { icon: keyof typeof Ionicons.gl
   );
 }
 
-export function CommunityCard({ photo, title, subtitle, badge, onPress }: { photo?: string; title: string; subtitle: string; badge: { label: string; tone: Tone }; onPress: () => void }) {
+export function CommunityCard({ photo, title, subtitle, zone, owner, badge, section, onPress }: { photo?: string; title: string; subtitle: string; zone: string; owner: string; badge: { label: string; tone: Tone }; section: SectionKey; onPress: () => void }) {
+  const accent = sections[section];
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={onPress} className="flex-row rounded-2xl bg-white p-3">
+    <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={onPress} className="overflow-hidden rounded-3xl bg-white">
       {photo ? (
-        <Image source={{ uri: photoUrl(photo) }} style={{ width: 92, height: 92, borderRadius: 14 }} contentFit="cover" />
+        <Image source={{ uri: photoUrl(photo) }} style={{ width: '100%', height: 180 }} contentFit="cover" transition={150} />
       ) : (
-        <View className="h-[92px] w-[92px] items-center justify-center rounded-2xl bg-canvas">
-          <Ionicons name="image-outline" size={26} color={colors.muted} />
+        <View className={`h-[180px] items-center justify-center ${accent.soft}`}>
+          <Ionicons name={accent.icon} size={40} color={accent.color} />
         </View>
       )}
-      <View className="ml-3 flex-1 justify-between py-1">
-        <View>
-          <Text numberOfLines={2} className="font-medium text-base text-ink">{title}</Text>
-          <Text numberOfLines={2} className="mt-1 font-sans text-xs text-muted">{subtitle}</Text>
-        </View>
+      <View className="absolute left-3 top-3">
         <StatusBadge {...badge} />
+      </View>
+      <View className="p-4">
+        <Text numberOfLines={2} className="font-display text-lg leading-6 text-navy">{title}</Text>
+        <Text numberOfLines={1} className="mt-1 font-sans text-sm text-muted">{subtitle}</Text>
+        <View className="mt-3 flex-row items-center border-t border-line pt-3">
+          <Ionicons name="location-outline" size={15} color={accent.color} />
+          <Text numberOfLines={1} className="ml-1 flex-1 font-sans text-xs text-ink">{zone}</Text>
+          <Text numberOfLines={1} className="ml-2 max-w-[45%] font-sans text-xs text-muted">{owner}</Text>
+        </View>
       </View>
     </Pressable>
   );
+}
+
+// Encabezado con el color de la sección y su acción principal.
+export function SectionHero({ section, actionLabel, onAction }: { section: SectionKey; actionLabel: string; onAction: () => void }) {
+  const item = sections[section];
+  return (
+    <View className={`rounded-3xl p-4 ${item.soft}`}>
+      <View className="flex-row items-center">
+        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-white">
+          <Ionicons name={item.icon} size={24} color={item.color} />
+        </View>
+        <Text className="ml-3 flex-1 font-sans text-sm leading-5 text-ink">{item.description}</Text>
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onAction}
+        className="mt-4 h-12 flex-row items-center justify-center rounded-2xl"
+        style={{ backgroundColor: item.color }}
+      >
+        <Ionicons name="add-circle-outline" size={20} color={colors.white} />
+        <Text className="ml-2 font-medium text-white">{actionLabel}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+export function FilterChips<T>({ options, value, onChange }: { options: { label: string; value: T }[]; value: T; onChange: (value: T) => void }) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerClassName="gap-2">
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <Pressable
+            key={option.label}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            onPress={() => onChange(option.value)}
+            className={`rounded-full border px-4 py-2 ${active ? 'border-navy bg-navy' : 'border-line bg-white'}`}
+          >
+            <Text className={`font-medium text-xs ${active ? 'text-white' : 'text-navy'}`}>{option.label}</Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+export function matches(query: string, ...fields: string[]) {
+  const text = query.trim().toLocaleLowerCase('es-PE');
+  return !text || fields.join(' ').toLocaleLowerCase('es-PE').includes(text);
 }
