@@ -1,3 +1,4 @@
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { readImage } from "@/services/images";
 import { goBackOr } from "@/utils/navigation";
 import { ScreenHeader } from "@/components/screen-header";
@@ -482,6 +483,9 @@ export function ManoRemote() {
                   style={card}
                   onPress={() => void run(() => details(r))}
                 >
+                  <View style={{ position: "absolute", right: 12, top: 12, zIndex: 1 }}>
+                    <FavoriteButton type="mano" id={r.id} size="sm" />
+                  </View>
                   <Text style={{ color: "#d7192d" }}>
                     {labels[r.kind]} · {r.category}
                   </Text>

@@ -67,6 +67,7 @@ export default function AdoptionsScreen() {
           renderItem={({ item }) => (
             <CommunityCard
               section="adopciones"
+              saved={{ type: 'adoption', id: item.id }}
               photo={item.photos[0]}
               title={item.pet_name}
               subtitle={`${speciesLabels[item.species]} · ${item.age_text} · ${sizeLabels[item.size]}`}

@@ -386,7 +386,7 @@ export async function deleteRemoteListing(listingId: string) {
   if (error) throw error;
 }
 
-function mapListingRow(row: Record<string, unknown>): Listing {
+export function mapListingRow(row: Record<string, unknown>): Listing {
   const media = Array.isArray(row.media_urls)
     ? row.media_urls.filter((item): item is string => typeof item === "string")
     : [];

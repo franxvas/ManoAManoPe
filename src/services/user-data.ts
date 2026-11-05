@@ -1,25 +1,19 @@
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { AppNotification } from '@/types/domain';
+import { fetchSavedIds, setSaved } from '@/features/guardados/api';
 
+// Los favoritos de publicaciones viven en la tabla única de guardados.
 export async function fetchFavoriteIds(): Promise<string[]> {
   if (!supabase) return [];
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return [];
-  const { data, error } = await supabase.from('favorites').select('listing_id').eq('user_id', auth.user.id);
-  if (error) throw error;
-  return (data ?? []).map((row) => String(row.listing_id));
+  return fetchSavedIds('listing');
 }
 
 export async function toggleRemoteFavorite(listingId: string, currentlyFavorite: boolean) {
   if (!supabase) throw new Error('Supabase no está configurado');
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) throw new Error('Debes iniciar sesión');
-  const request = currentlyFavorite
-    ? supabase.from('favorites').delete().eq('user_id', auth.user.id).eq('listing_id', listingId)
-    : supabase.from('favorites').insert({ user_id: auth.user.id, listing_id: listingId });
-  const { error } = await request;
-  if (error) throw error;
+  await setSaved('listing', listingId, !currentlyFavorite);
 }
 
 export async function fetchNotifications(): Promise<AppNotification[]> {
