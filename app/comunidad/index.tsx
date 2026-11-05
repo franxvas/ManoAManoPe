@@ -15,6 +15,12 @@ import { eventPhase, timeText, type CommunityEvent } from '@/features/comunidad/
 import { sections, type SectionKey } from '@/features/comunidad/theme';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
+const activity: { tab: string; title: string; description: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { tab: 'solicitudes', title: 'Mis solicitudes', description: 'Donaciones y adopciones que pediste', icon: 'file-tray-outline' },
+  { tab: 'inscripciones', title: 'Mis inscripciones', description: 'Eventos y talleres donde tienes cupo', icon: 'ticket-outline' },
+  { tab: 'publicaciones', title: 'Mis publicaciones', description: 'Lo que publicaste y sus solicitudes', icon: 'megaphone-outline' },
+];
+
 export default function CommunityScreen() {
   const enabled = isSupabaseConfigured;
   const donations = useQuery({ queryKey: ['donations'], queryFn: fetchDonations, enabled });
@@ -75,20 +81,25 @@ export default function CommunityScreen() {
         )}
 
         <Text className="mb-3 mt-7 font-display text-xl text-navy">Tu actividad</Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push('/comunidad/mis-solicitudes')}
-          className="flex-row items-center rounded-2xl bg-white p-4"
-        >
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-canvas">
-            <Ionicons name="file-tray-outline" size={22} color={colors.navy} />
-          </View>
-          <View className="ml-3 flex-1">
-            <Text className="font-medium text-ink">Mis solicitudes</Text>
-            <Text className="font-sans text-xs text-muted">Donaciones y adopciones que pediste</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-        </Pressable>
+        <View className="overflow-hidden rounded-2xl bg-white">
+          {activity.map((item, index) => (
+            <Pressable
+              key={item.tab}
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: '/comunidad/mi-actividad', params: { tab: item.tab } })}
+              className={`flex-row items-center p-4 ${index ? 'border-t border-line' : ''}`}
+            >
+              <View className="h-11 w-11 items-center justify-center rounded-xl bg-canvas">
+                <Ionicons name={item.icon} size={22} color={colors.navy} />
+              </View>
+              <View className="ml-3 flex-1">
+                <Text className="font-medium text-ink">{item.title}</Text>
+                <Text className="font-sans text-xs text-muted">{item.description}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+            </Pressable>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
