@@ -6,7 +6,7 @@ import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
 import { colors } from '@/constants/theme';
 import { useProtectedAction } from '@/hooks/use-protected-action';
-import { StatusBadge } from '../components';
+import { ActionFeedback, StatusBadge } from '../components';
 import { requestStatusLabels } from '../solicitudes';
 import { useCommunityAction } from '../use-action';
 import {
@@ -30,7 +30,7 @@ export function AdoptionRequestsPanel({ adoption, userId }: { adoption: Adoption
 
   if (userId && applications.isLoading) return <ActivityIndicator className="my-6" color={colors.red} />;
   const list = applications.data ?? [];
-  const errorText = Boolean(action.error) && <Text accessibilityRole="alert" className="mt-3 font-sans text-sm text-brand">{action.error}</Text>;
+  const errorText = <ActionFeedback error={action.error} notice={action.notice} />;
 
   if (isOwner) {
     const accepted = list.find((item) => item.status === 'accepted');
@@ -44,8 +44,8 @@ export function AdoptionRequestsPanel({ adoption, userId }: { adoption: Adoption
           <View className="mt-4 rounded-2xl bg-amber-50 p-4">
             <Text className="font-medium text-ink">Adopción acordada con {accepted.applicant_name}</Text>
             <Text className="mt-1 font-sans text-xs text-muted">Confirma solo cuando {adoption.pet_name} ya esté en su nuevo hogar.</Text>
-            <PrimaryButton className="mt-3" label="Confirmar entrega" loading={action.busy} onPress={() => void action.run(() => completeAdoption(adoption.id))} />
-            <PrimaryButton className="mt-2" variant="outline" label="Cancelar proceso" disabled={action.busy} onPress={() => void action.run(() => cancelAdoptionProcess(adoption.id))} />
+            <PrimaryButton className="mt-3" label="Confirmar entrega" loading={action.busy} onPress={() => void action.run(() => completeAdoption(adoption.id), { confirm: { title: 'Confirmar entrega', message: 'Confírmalo solo cuando ' + adoption.pet_name + ' ya esté en su nuevo hogar.', confirmLabel: 'Ya fue adoptado' }, success: '¡' + adoption.pet_name + ' ya tiene hogar!' })} />
+            <PrimaryButton className="mt-2" variant="outline" label="Cancelar proceso" disabled={action.busy} onPress={() => void action.run(() => cancelAdoptionProcess(adoption.id), { confirm: { title: 'Cancelar proceso', message: adoption.pet_name + ' volverá a buscar hogar.', confirmLabel: 'Cancelar proceso' }, success: 'Proceso cancelado.' })} />
           </View>
         )}
         {adoption.status === 'adopted' && <Text className="mt-4 font-sans text-sm text-success">¡{adoption.pet_name} ya tiene un hogar!</Text>}
@@ -55,10 +55,10 @@ export function AdoptionRequestsPanel({ adoption, userId }: { adoption: Adoption
             {canDecide && (
               <View className="mt-3 gap-2">
                 {application.status === 'pending' && (
-                  <PrimaryButton className="h-11" variant="outline" label="Pasar a evaluación" disabled={action.busy} onPress={() => void action.run(() => reviewApplication(application.id, 'evaluate'))} />
+                  <PrimaryButton className="h-11" variant="outline" label="Pasar a evaluación" disabled={action.busy} onPress={() => void action.run(() => reviewApplication(application.id, 'evaluate'), { success: 'Solicitud en evaluación.' })} />
                 )}
-                <PrimaryButton className="h-11" variant="secondary" label="Acordar adopción" disabled={action.busy} onPress={() => void action.run(() => reviewApplication(application.id, 'agree'))} />
-                <PrimaryButton className="h-11" variant="outline" label="No seleccionar" disabled={action.busy} onPress={() => void action.run(() => reviewApplication(application.id, 'decline'))} />
+                <PrimaryButton className="h-11" variant="secondary" label="Acordar adopción" disabled={action.busy} onPress={() => void action.run(() => reviewApplication(application.id, 'agree'), { confirm: { title: 'Acordar adopción', message: 'Acordarás la adopción con ' + application.applicant_name + '. Las demás solicitudes quedarán en espera.', confirmLabel: 'Acordar' }, success: 'Adopción acordada. Coordina la entrega.' })} />
+                <PrimaryButton className="h-11" variant="outline" label="No seleccionar" disabled={action.busy} onPress={() => void action.run(() => reviewApplication(application.id, 'decline'), { confirm: { title: 'No seleccionar', message: 'Le avisaremos a ' + application.applicant_name + ' que su solicitud no fue elegida.', confirmLabel: 'No seleccionar' } })} />
               </View>
             )}
           </ApplicationCard>
@@ -79,14 +79,14 @@ export function AdoptionRequestsPanel({ adoption, userId }: { adoption: Adoption
           </View>
           {mine.status === 'accepted' && <Text className="mt-2 font-sans text-sm text-ink">¡Acordaron la adopción! Coordina la entrega con quien publicó.</Text>}
           {(mine.status === 'pending' || mine.status === 'evaluating') && (
-            <PrimaryButton className="mt-3" variant="outline" label="Retirar solicitud" disabled={action.busy} onPress={() => void action.run(() => withdrawApplication(mine.id))} />
+            <PrimaryButton className="mt-3" variant="outline" label="Retirar solicitud" disabled={action.busy} onPress={() => void action.run(() => withdrawApplication(mine.id), { confirm: { title: 'Retirar solicitud', message: 'Quien publica ya no verá tu solicitud.', confirmLabel: 'Retirar' }, success: 'Retiraste tu solicitud.' })} />
           )}
           {mine.status === 'accepted' && (
-            <PrimaryButton className="mt-3" variant="outline" label="Cancelar proceso" disabled={action.busy} onPress={() => void action.run(() => cancelAdoptionProcess(adoption.id))} />
+            <PrimaryButton className="mt-3" variant="outline" label="Cancelar proceso" disabled={action.busy} onPress={() => void action.run(() => cancelAdoptionProcess(adoption.id), { confirm: { title: 'Cancelar proceso', message: 'Se cancelará la adopción acordada.', confirmLabel: 'Cancelar proceso' }, success: 'Proceso cancelado.' })} />
           )}
         </>
       ) : adoption.status === 'seeking' || adoption.status === 'evaluating' ? (
-        <ApplicationForm petName={adoption.pet_name} busy={action.busy} onSend={(answers) => action.run(() => applyForAdoption(adoption.id, answers))} />
+        <ApplicationForm petName={adoption.pet_name} busy={action.busy} onSend={(answers) => action.run(() => applyForAdoption(adoption.id, answers), { success: '¡Solicitud enviada! Quien publica la revisará con calma.' })} />
       ) : (
         <Text className="font-sans text-sm text-muted">{adoption.status === 'agreed' ? 'Ya se acordó la adopción con otra persona.' : `${adoption.pet_name} ya fue adoptado.`}</Text>
       )}

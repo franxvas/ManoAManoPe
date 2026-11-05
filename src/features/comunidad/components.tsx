@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { useState, type ReactNode } from 'react';
 import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { colors } from '@/constants/theme';
 import { photoUrl } from './api';
 import { sections, type SectionKey } from './theme';
@@ -92,12 +94,73 @@ export function PhotoPicker({ photos, onChange, onError, max = 6, label = 'Fotog
 
 export function PhotoGallery({ paths }: { paths: string[] }) {
   const { width } = useWindowDimensions();
+  const [index, setIndex] = useState(0);
   return (
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} className="bg-navy">
-      {paths.map((path) => (
-        <Image key={path} source={{ uri: photoUrl(path) }} style={{ width, height: 280 }} contentFit="cover" />
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={32}
+        onScroll={(event) => setIndex(Math.round(event.nativeEvent.contentOffset.x / width))}
+        className="bg-navy"
+      >
+        {paths.map((path) => (
+          <Image key={path} source={{ uri: photoUrl(path) }} style={{ width, height: 300 }} contentFit="cover" transition={150} />
+        ))}
+      </ScrollView>
+      {paths.length > 1 && (
+        <View className="absolute bottom-10 w-full flex-row justify-center gap-1.5">
+          {paths.map((path, i) => (
+            <View key={path} className={`h-2 rounded-full ${i === index ? 'w-5 bg-white' : 'w-2 bg-white/60'}`} />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+// Hoja blanca que se monta sobre la foto en los detalles.
+export function DetailSheet({ children }: { children: ReactNode }) {
+  return <View className="-mt-6 rounded-t-3xl bg-white p-5">{children}</View>;
+}
+
+export function QuickFacts({ facts, color }: { facts: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }[]; color: string }) {
+  return (
+    <View className="mt-4 flex-row gap-2">
+      {facts.map((fact) => (
+        <View key={fact.label} className="flex-1 items-center rounded-2xl bg-canvas px-2 py-3">
+          <Ionicons name={fact.icon} size={20} color={color} />
+          <Text numberOfLines={1} className="mt-1 font-medium text-sm text-ink">{fact.value}</Text>
+          <Text className="font-sans text-[11px] text-muted">{fact.label}</Text>
+        </View>
       ))}
-    </ScrollView>
+    </View>
+  );
+}
+
+export function OwnerCard({ name, avatar, label }: { name: string; avatar?: string | null; label: string }) {
+  return (
+    <View className="mt-4 flex-row items-center rounded-2xl bg-canvas p-3">
+      <View className="h-11 w-11 rounded-full bg-line">
+        <Avatar uri={avatar ?? undefined} name={name} size={44} />
+      </View>
+      <View className="ml-3 flex-1">
+        <Text className="font-sans text-xs text-muted">{label}</Text>
+        <Text className="font-medium text-ink">{name}</Text>
+      </View>
+      <Ionicons name="shield-checkmark-outline" size={18} color={colors.success} />
+    </View>
+  );
+}
+
+export function ActionFeedback({ error, notice }: { error: string; notice: string }) {
+  if (!error && !notice) return null;
+  return (
+    <View accessibilityRole="alert" className={`mt-3 flex-row items-center rounded-2xl px-4 py-3 ${error ? 'bg-red-50' : 'bg-green-50'}`}>
+      <Ionicons name={error ? 'alert-circle' : 'checkmark-circle'} size={18} color={error ? colors.red : colors.success} />
+      <Text className={`ml-2 flex-1 font-medium text-sm ${error ? 'text-brand' : 'text-success'}`}>{error || notice}</Text>
+    </View>
   );
 }
 

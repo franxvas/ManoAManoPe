@@ -6,6 +6,7 @@ export interface Adoption {
   id: string;
   owner_id: string;
   owner_name: string;
+  owner_avatar: string | null;
   pet_name: string;
   species: keyof typeof speciesLabels;
   age_text: string;

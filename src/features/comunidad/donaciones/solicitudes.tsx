@@ -6,7 +6,7 @@ import { FormField } from '@/components/form-field';
 import { PrimaryButton } from '@/components/primary-button';
 import { colors } from '@/constants/theme';
 import { useProtectedAction } from '@/hooks/use-protected-action';
-import { StatusBadge } from '../components';
+import { ActionFeedback, StatusBadge } from '../components';
 import { requestStatusLabels } from '../solicitudes';
 import { useCommunityAction } from '../use-action';
 import {
@@ -43,8 +43,8 @@ export function DonationRequestsPanel({ donation, userId }: { donation: Donation
             <Text className="font-medium text-ink">Reservado para {selected.requester_name}</Text>
             <Text className="mt-1 font-sans text-sm text-muted">“{selected.message}”</Text>
             <Text className="mt-2 font-sans text-xs text-muted">Márcalo como entregado solo cuando la persona ya lo haya recogido.</Text>
-            <PrimaryButton className="mt-3" label="Marcar como entregado" loading={action.busy} onPress={() => void action.run(() => markDonationDelivered(donation.id))} />
-            <PrimaryButton className="mt-2" variant="outline" label="Cancelar acuerdo y volver a disponible" disabled={action.busy} onPress={() => void action.run(() => cancelDonationAgreement(donation.id))} />
+            <PrimaryButton className="mt-3" label="Marcar como entregado" loading={action.busy} onPress={() => void action.run(() => markDonationDelivered(donation.id), { confirm: { title: 'Marcar como entregado', message: 'Confírmalo solo si la persona ya recogió la donación.', confirmLabel: 'Ya se entregó' }, success: '¡Listo! La donación quedó como entregada.' })} />
+            <PrimaryButton className="mt-2" variant="outline" label="Cancelar acuerdo y volver a disponible" disabled={action.busy} onPress={() => void action.run(() => cancelDonationAgreement(donation.id), { confirm: { title: 'Cancelar acuerdo', message: 'La donación volverá a estar disponible para otras personas.', confirmLabel: 'Cancelar acuerdo' }, success: 'La donación vuelve a estar disponible.' })} />
           </View>
         )}
         {donation.status === 'available' && pending.length === 0 && <Text className="mt-4 font-sans text-sm text-muted">Todavía nadie la ha solicitado.</Text>}
@@ -53,11 +53,11 @@ export function DonationRequestsPanel({ donation, userId }: { donation: Donation
             <Text className="font-medium text-ink">{request.requester_name}</Text>
             <Text className="mt-1 font-sans text-sm leading-5 text-ink">“{request.message}”</Text>
             {donation.status === 'available' && (
-              <PrimaryButton className="mt-3 h-11" variant="secondary" label="Elegir a esta persona" disabled={action.busy} onPress={() => void action.run(() => selectDonationRequest(request.id))} />
+              <PrimaryButton className="mt-3 h-11" variant="secondary" label="Elegir a esta persona" disabled={action.busy} onPress={() => void action.run(() => selectDonationRequest(request.id), { confirm: { title: 'Elegir a ' + request.requester_name, message: 'La donación quedará reservada para esta persona.', confirmLabel: 'Elegir' }, success: 'Reservada. Le avisamos a ' + request.requester_name + '.' })} />
             )}
           </View>
         ))}
-        {Boolean(action.error) && <Text accessibilityRole="alert" className="mt-3 font-sans text-sm text-brand">{action.error}</Text>}
+        <ActionFeedback error={action.error} notice={action.notice} />
       </View>
     );
   }
@@ -70,15 +70,15 @@ export function DonationRequestsPanel({ donation, userId }: { donation: Donation
           status={mine.status}
           message={mine.message}
           busy={action.busy}
-          onWithdraw={() => void action.run(() => withdrawDonationRequest(mine.id))}
-          onCancel={() => void action.run(() => cancelDonationAgreement(donation.id))}
+          onWithdraw={() => void action.run(() => withdrawDonationRequest(mine.id), { confirm: { title: 'Retirar solicitud', message: 'Quien dona ya no verá tu pedido.', confirmLabel: 'Retirar' }, success: 'Retiraste tu solicitud.' })}
+          onCancel={() => void action.run(() => cancelDonationAgreement(donation.id), { confirm: { title: 'Ya no la necesito', message: 'Se cancelará el acuerdo y la donación quedará libre para otra persona.', confirmLabel: 'Cancelar acuerdo' }, success: 'Listo, liberaste la donación.' })}
         />
       ) : donation.status === 'available' ? (
-        <RequestForm busy={action.busy} onSend={(message) => action.run(() => requestDonation(donation.id, message))} />
+        <RequestForm busy={action.busy} onSend={(message) => action.run(() => requestDonation(donation.id, message), { success: '¡Solicitud enviada! Te avisaremos si te eligen.' })} />
       ) : (
         <Text className="font-sans text-sm text-muted">{donation.status === 'reserved' ? 'Ya está reservada para otra persona.' : 'Esta donación ya fue entregada.'}</Text>
       )}
-      {Boolean(action.error) && <Text accessibilityRole="alert" className="mt-3 font-sans text-sm text-brand">{action.error}</Text>}
+      <ActionFeedback error={action.error} notice={action.notice} />
     </View>
   );
 }
