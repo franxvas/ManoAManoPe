@@ -14,8 +14,8 @@ export function FavoriteButton({ type, id, size = 'md' }: { type: SavedType; id:
   const box = size === 'sm' ? 'h-9 w-9' : 'h-11 w-11';
 
   return (
+    // Sin rol de botón: en la web va dentro de tarjetas que ya son botones y no se pueden anidar.
     <Pressable
-      accessibilityRole="button"
       accessibilityLabel={saved ? 'Quitar de guardados' : 'Guardar'}
       accessibilityState={{ selected: saved }}
       hitSlop={8}
