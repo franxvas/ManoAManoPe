@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, SectionList, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, SectionList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/empty-state';
+import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
-import { FilterChips, SectionHero } from '@/features/comunidad/components';
 import { DayStrip, EventCard, dayTitle, nextDays } from '@/features/comunidad/eventos/components';
 import { dayKey, eventPhase } from '@/features/comunidad/eventos/model';
 import { fetchEvents, fetchSavedEventIds } from '@/features/comunidad/eventos/api';
@@ -54,6 +54,21 @@ export default function EventsCalendarScreen() {
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
       <ScreenHeader title="Eventos y campañas" showBack />
+      <View className="gap-3 px-5 pt-3">
+        <PrimaryButton label="Crear evento o campaña" onPress={() => protect(() => router.push('/comunidad/eventos/nuevo'), '/comunidad/eventos')} />
+        <View className="flex-row gap-2">
+          {tabs.map((item) => (
+            <Pressable
+              key={item.value}
+              onPress={() => setTab(item.value)}
+              className={`rounded-full border px-4 py-2 ${tab === item.value ? 'border-brand bg-brand' : 'border-line bg-white'}`}
+            >
+              <Text className={`font-medium text-xs ${tab === item.value ? 'text-white' : 'text-navy'}`}>{item.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+        {tab !== 'finished' && <DayStrip days={days} selected={day} marked={marked} onSelect={(value) => setDay(value === day ? undefined : value)} />}
+      </View>
       {!isSupabaseConfigured ? (
         <EmptyState icon="cloud-offline-outline" title="Comunidad necesita conexión" description="Conecta Supabase para ver el calendario." />
       ) : events.isLoading ? (
@@ -66,13 +81,6 @@ export default function EventsCalendarScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 48 }}
           stickySectionHeadersEnabled={false}
-          ListHeaderComponent={
-            <View className="gap-3 px-5 pt-5">
-              <SectionHero section="eventos" actionLabel="Crear evento o campaña" onAction={() => protect(() => router.push('/comunidad/eventos/nuevo'), '/comunidad/eventos')} />
-              <FilterChips options={tabs} value={tab} onChange={setTab} />
-              {tab !== 'finished' && <DayStrip days={days} selected={day} marked={marked} onSelect={(value) => setDay(value === day ? undefined : value)} />}
-            </View>
-          }
           refreshing={events.isRefetching}
           onRefresh={() => void events.refetch()}
           renderSectionHeader={({ section }) => <Text className="px-5 pb-2 pt-4 font-display text-lg text-navy">{section.title}</Text>}

@@ -13,11 +13,11 @@ export interface AdoptionInput {
   photos: { uri: string; path?: string }[];
 }
 
-const columns = '*, owner:profiles(display_name, avatar_url)';
+const columns = '*, owner:profiles(display_name)';
 
 function mapAdoption(row: Record<string, any>): Adoption {
   const { owner, ...adoption } = row;
-  return { ...adoption, owner_name: owner?.display_name ?? 'Vecino', owner_avatar: owner?.avatar_url ?? null } as Adoption;
+  return { ...adoption, owner_name: owner?.display_name ?? 'Vecino' } as Adoption;
 }
 
 export async function fetchAdoptions() {

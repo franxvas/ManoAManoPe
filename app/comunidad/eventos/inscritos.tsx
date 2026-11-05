@@ -10,7 +10,6 @@ import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { eventPhase, seatsInfo } from '@/features/comunidad/eventos/model';
 import { fetchAttendees, fetchEvent, setAttendance, type Attendee } from '@/features/comunidad/eventos/api';
-import { ActionFeedback } from '@/features/comunidad/components';
 import { useCommunityAction } from '@/features/comunidad/use-action';
 import { formatRelativeDate } from '@/utils/format';
 
@@ -64,7 +63,7 @@ export default function AttendeesScreen() {
             <Text className="mt-2 font-sans text-xs text-muted">
               {started ? 'Marca quién llegó. Estar inscrito no significa haber asistido.' : 'Podrás marcar la asistencia cuando empiece el evento.'}
             </Text>
-            <ActionFeedback error={action.error} notice={action.notice} />
+            {Boolean(action.error) && <Text accessibilityRole="alert" className="mt-2 font-sans text-sm text-brand">{action.error}</Text>}
           </View>
         }
         ListEmptyComponent={<EmptyState icon="people-outline" title="Aún no hay inscritos" description="Cuando alguien se inscriba aparecerá aquí." />}

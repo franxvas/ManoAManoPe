@@ -1,6 +1,7 @@
 import { goBackOr } from "@/utils/navigation";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,26 +10,28 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
-import { ActionFeedback, DetailSheet, InfoRow, OwnerCard, PhotoGallery, QuickFacts, StatusBadge } from '@/features/comunidad/components';
+import { InfoRow, PhotoGallery, StatusBadge } from '@/features/comunidad/components';
 import { DonationRequestsPanel } from '@/features/comunidad/donaciones/solicitudes';
 import { deleteDonation, fetchDonation } from '@/features/comunidad/donaciones/api';
 import { conditionLabels, donationStatus } from '@/features/comunidad/donaciones/model';
-import { sections } from '@/features/comunidad/theme';
-import { useCommunityAction } from '@/features/comunidad/use-action';
 
 export default function DonationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
+  const cache = useQueryClient();
   const query = useQuery({ queryKey: ['donation', id], queryFn: () => fetchDonation(id) });
-  const action = useCommunityAction([['donations']]);
+  const [error, setError] = useState('');
   const donation = query.data;
   const isOwner = Boolean(donation && donation.owner_id === session?.user.id);
 
   async function remove() {
-    const removed = await action.run(() => deleteDonation(id), {
-      confirm: { title: 'Retirar donación', message: 'La publicación y sus solicitudes se borrarán. ¿Quieres continuar?', confirmLabel: 'Retirar' },
-    });
-    if (removed) goBackOr('/(tabs)');
+    try {
+      await deleteDonation(id);
+      await cache.invalidateQueries({ queryKey: ['donations'] });
+      goBackOr('/(tabs)');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo eliminar.');
+    }
   }
 
   return (
@@ -41,32 +44,26 @@ export default function DonationDetail() {
       ) : (
         <ScrollView contentContainerClassName="pb-12">
           <PhotoGallery paths={donation.photos} />
-          <DetailSheet>
+          <View className="bg-white p-5">
             <StatusBadge {...donationStatus[donation.status]} />
-            <Text className="mt-3 font-display text-[26px] leading-8 text-navy">{donation.title}</Text>
-            <QuickFacts
-              color={sections.donaciones.color}
-              facts={[
-                { icon: 'sparkles-outline', label: 'Estado', value: conditionLabels[donation.condition] },
-                { icon: 'layers-outline', label: 'Cantidad', value: String(donation.quantity) },
-                { icon: 'heart-outline', label: 'Precio', value: 'Gratis' },
-              ]}
-            />
-            {Boolean(donation.description) && <Text className="mt-4 font-sans leading-6 text-ink">{donation.description}</Text>}
+            <Text className="mt-3 font-display text-2xl text-navy">{donation.title}</Text>
+            <Text className="mt-1 font-sans text-sm text-muted">Dona {donation.owner_name} · Gratis</Text>
+            {Boolean(donation.description) && <Text className="mt-4 font-sans leading-5 text-ink">{donation.description}</Text>}
             <View className="mt-4">
+              <InfoRow icon="sparkles-outline" label="Estado del objeto" value={conditionLabels[donation.condition]} />
+              <InfoRow icon="layers-outline" label="Cantidad" value={String(donation.quantity)} />
               <InfoRow icon="location-outline" label="Zona" value={donation.zone} />
               <InfoRow icon="time-outline" label="Condiciones y horario de recojo" value={donation.pickup_terms} />
             </View>
-            <OwnerCard name={donation.owner_name} avatar={donation.owner_avatar} label="Dona" />
-          </DetailSheet>
+          </View>
           <DonationRequestsPanel donation={donation} userId={session?.user.id} />
           {isOwner && (
             <View className="mt-3 gap-3 bg-white p-5">
               <PrimaryButton variant="outline" label="Editar donación" onPress={() => router.push({ pathname: '/comunidad/donaciones/nueva', params: { id } })} />
-              {donation.status === 'available' && <PrimaryButton variant="outline" label="Retirar publicación" loading={action.busy} onPress={() => void remove()} />}
-              <ActionFeedback error={action.error} notice={action.notice} />
+              {donation.status === 'available' && <PrimaryButton variant="outline" label="Retirar publicación" onPress={() => void remove()} />}
             </View>
           )}
+          {Boolean(error) && <Text accessibilityRole="alert" className="px-5 pt-3 font-sans text-sm text-brand">{error}</Text>}
         </ScrollView>
       )}
     </SafeAreaView>

@@ -7,7 +7,6 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { colors } from '@/constants/theme';
 import { photoUrl } from '../api';
 import { StatusBadge } from '../components';
-import { sections } from '../theme';
 import { categoryText, dayKey, eventPhase, parseDay, phaseBadges, seatsInfo, timeText, type CommunityEvent } from './model';
 
 export function nextDays(count: number, from = new Date()) {
@@ -41,15 +40,13 @@ export function DayStrip({ days, selected, marked, onSelect }: { days: Date[]; s
 
 export function EventCard({ event, onPress, showDate = false }: { event: CommunityEvent; onPress: () => void; showDate?: boolean }) {
   const start = new Date(event.starts_at);
-  const section = sections[event.kind === 'workshop' ? 'talleres' : 'eventos'];
-  const seats = seatsInfo(event);
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={event.title} onPress={onPress} className="flex-row rounded-3xl bg-white p-3">
+    <Pressable accessibilityRole="button" accessibilityLabel={event.title} onPress={onPress} className="flex-row rounded-2xl bg-white p-3">
       {event.photo ? (
         <Image source={{ uri: photoUrl(event.photo) }} style={{ width: 80, height: 80, borderRadius: 14 }} contentFit="cover" />
       ) : (
-        <View className={`h-20 w-20 items-center justify-center rounded-2xl ${section.soft}`}>
-          <Ionicons name={section.icon} size={28} color={section.color} />
+        <View className="h-20 w-20 items-center justify-center rounded-2xl bg-red-50">
+          <Ionicons name="calendar-outline" size={28} color={colors.red} />
         </View>
       )}
       <View className="ml-3 flex-1">
@@ -58,14 +55,9 @@ export function EventCard({ event, onPress, showDate = false }: { event: Communi
           {showDate && `${format(start, "EEE d 'de' MMM", { locale: es })} · `}
           {timeText(start)} – {timeText(new Date(event.ends_at))} · {event.place}
         </Text>
-        {event.requires_registration && (
-          <View className="mt-1 flex-row items-center">
-            <Ionicons name="people-outline" size={13} color={seats.full ? colors.red : section.color} />
-            <Text className={`ml-1 font-medium text-xs ${seats.full ? 'text-brand' : section.text}`}>{seats.text}</Text>
-          </View>
-        )}
+        {event.requires_registration && <Text className="mt-1 font-medium text-xs text-navy">{seatsInfo(event).text}</Text>}
         <View className="mt-2 flex-row gap-2">
-          <StatusBadge label={categoryText(event)} tone={event.kind === 'workshop' ? 'green' : 'red'} />
+          <StatusBadge label={categoryText(event)} tone="red" />
           <StatusBadge {...phaseBadges[eventPhase(event)]} />
         </View>
       </View>

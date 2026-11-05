@@ -11,11 +11,11 @@ export interface DonationInput {
   photos: { uri: string; path?: string }[];
 }
 
-const columns = '*, owner:profiles(display_name, avatar_url)';
+const columns = '*, owner:profiles(display_name)';
 
 function mapDonation(row: Record<string, any>): Donation {
   const { owner, ...donation } = row;
-  return { ...donation, owner_name: owner?.display_name ?? 'Vecino', owner_avatar: owner?.avatar_url ?? null } as Donation;
+  return { ...donation, owner_name: owner?.display_name ?? 'Vecino' } as Donation;
 }
 
 export async function fetchDonations() {

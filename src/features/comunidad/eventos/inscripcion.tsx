@@ -6,7 +6,6 @@ import { useProtectedAction } from '@/hooks/use-protected-action';
 import { registrationClosed } from '../talleres/model';
 import { eventPhase, seatsInfo, type CommunityEvent } from './model';
 import { cancelRegistration, isRegistered, registerForEvent } from './api';
-import { ActionFeedback } from '../components';
 import { useCommunityAction } from '../use-action';
 
 export function RegistrationPanel({ event, userId }: { event: CommunityEvent; userId?: string }) {
@@ -37,7 +36,7 @@ export function RegistrationPanel({ event, userId }: { event: CommunityEvent; us
       ) : registered.data ? (
         <>
           <Text className="mt-3 font-sans text-sm text-ink">Ya estás inscrito.</Text>
-          <PrimaryButton className="mt-3" variant="outline" label="Cancelar mi inscripción" loading={action.busy} onPress={() => void action.run(() => cancelRegistration(event.id), { confirm: { title: 'Cancelar inscripción', message: 'Tu cupo quedará libre para otra persona.', confirmLabel: 'Cancelar inscripción' }, success: 'Cancelaste tu inscripción.' })} />
+          <PrimaryButton className="mt-3" variant="outline" label="Cancelar mi inscripción" loading={action.busy} onPress={() => void action.run(() => cancelRegistration(event.id))} />
         </>
       ) : closed ? (
         <Text className="mt-3 font-sans text-sm text-muted">Las inscripciones ya cerraron.</Text>
@@ -47,10 +46,10 @@ export function RegistrationPanel({ event, userId }: { event: CommunityEvent; us
           label={seats.full ? 'Sin cupos' : 'Inscribirme'}
           disabled={seats.full || registered.isLoading}
           loading={action.busy}
-          onPress={() => protect(() => void action.run(() => registerForEvent(event.id), { success: '¡Listo, ya estás inscrito!' }))}
+          onPress={() => protect(() => void action.run(() => registerForEvent(event.id)))}
         />
       )}
-      <ActionFeedback error={action.error} notice={action.notice} />
+      {Boolean(action.error) && <Text accessibilityRole="alert" className="mt-3 font-sans text-sm text-brand">{action.error}</Text>}
     </View>
   );
 }
