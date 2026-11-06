@@ -10,6 +10,7 @@ import {
   peruLocations,
   resolvePeruLocation,
 } from "@/services/peru";
+import { provinceOptions } from "@/services/peru-provinces";
 import { errorMessage } from "@/utils/errors";
 export function PeruLocationPicker({
   region,
@@ -110,14 +111,7 @@ export function PeruLocationPicker({
             label="Provincia"
             value={selectedProvince}
             disabled={!dep || busy}
-            options={rows
-              .filter(
-                (r) =>
-                  r.departamento === dep?.departamento &&
-                  r.provincia !== "00" &&
-                  r.distrito === "00",
-              )
-              .map((r) => ({ value: r.provincia, label: r.nombre }))}
+            options={provinceOptions(rows, dep?.departamento)}
             onChange={(v) => {
               P(v);
               onCoordinates?.(null);
