@@ -60,9 +60,8 @@ export default function ExploreScreen() {
     requestLocation,
     openLocationSettings,
   } = useDeviceLocation();
-  const searchCenter = coordinates
-    ? { latitude: region.latitude, longitude: region.longitude }
-    : null;
+  // Sin ubicación se busca alrededor del centro del mapa, que empieza en Bagua.
+  const searchCenter = { latitude: region.latitude, longitude: region.longitude };
   const nearby = useNearbyListings(searchCenter, radiusKm, type, categoryId);
   const remoteCategories = useQuery({
     queryKey: ["categories"],

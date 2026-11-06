@@ -8,13 +8,27 @@ import 'leaflet/dist/leaflet.css';
 import type { MapRegion, NearbyMapProps } from '@/components/nearby-map.types';
 import { colors } from '@/constants/theme';
 import { formatMoney, getListingAmount } from '@/utils/format';
+import { spreadPositions } from './map-spread';
 
-const markerIcon = (label: string, active: boolean) => L.divIcon({
-  className: '',
-  html: `<div style="background:${active ? colors.red : colors.navy};border:3px solid white;border-radius:18px;color:white;font:600 11px Inter,sans-serif;padding:6px 9px;box-shadow:0 3px 10px #0004;white-space:nowrap;transform:translate(-25%,-25%)">${label}</div>`,
-  iconSize: [60, 34],
-  iconAnchor: [30, 17],
-});
+const escape = (text: string) => text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+
+// Burbuja con la foto del vendedor (o de la publicación) y el precio debajo, apuntando a su ubicación.
+const markerIcon = (photo: string | undefined, label: string, active: boolean) => {
+  const ring = active ? colors.red : colors.navy;
+  const image = photo
+    ? `<img src="${escape(photo)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />`
+    : `<div style="width:100%;height:100%;border-radius:50%;background:${ring}"></div>`;
+  return L.divIcon({
+    className: '',
+    html: `<div style="display:flex;flex-direction:column;align-items:center;transform:scale(${active ? 1.15 : 1});transform-origin:bottom center">
+      <div style="width:46px;height:46px;border-radius:50%;border:3px solid ${ring};background:white;padding:1px;box-shadow:0 3px 10px #0005">${image}</div>
+      <div style="margin-top:-6px;background:${ring};color:white;font:600 10px Inter,sans-serif;padding:2px 6px;border-radius:9px;border:2px solid white;white-space:nowrap">${escape(label)}</div>
+      <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid ${ring}"></div>
+    </div>`,
+    iconSize: [80, 74],
+    iconAnchor: [40, 74],
+  });
+};
 
 const userIcon = L.divIcon({
   className: '',
@@ -52,6 +66,7 @@ function MapViewport({ region }: { region: MapRegion }) {
 }
 
 export function NearbyMap({ listings, region, selectedId, userCoordinates, locationUnavailable, onRegionChange, onSelect, onRequestLocation }: NearbyMapProps) {
+  const positions = spreadPositions(listings);
   const centerOnUser = () => {
     if (!userCoordinates) return onRequestLocation();
     onRegionChange({ ...region, ...userCoordinates });
@@ -59,7 +74,7 @@ export function NearbyMap({ listings, region, selectedId, userCoordinates, locat
 
   return (
     <View className="flex-1 overflow-hidden bg-slate-100">
-      <MapContainer center={[region.latitude, region.longitude]} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+      <MapContainer center={[region.latitude, region.longitude]} zoom={15} style={{ height: '100%', width: '100%' }} zoomControl={false}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <MapEvents onRegionChange={onRegionChange} />
         <MapViewport region={region} />
@@ -67,8 +82,8 @@ export function NearbyMap({ listings, region, selectedId, userCoordinates, locat
         {listings.map((listing) => (
           <Marker
             key={listing.id}
-            position={[listing.latitude, listing.longitude]}
-            icon={markerIcon(formatMoney(getListingAmount(listing.price, listing.budget)), listing.id === selectedId)}
+            position={[positions.get(listing.id)!.latitude, positions.get(listing.id)!.longitude]}
+            icon={markerIcon(listing.ownerAvatar || listing.images[0], formatMoney(getListingAmount(listing.price, listing.budget)), listing.id === selectedId)}
             eventHandlers={{ click: () => onSelect(listing) }}
           />
         ))}

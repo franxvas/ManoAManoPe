@@ -1,14 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRef } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 import type { NearbyMapProps } from '@/components/nearby-map.types';
 import { colors } from '@/constants/theme';
 import { formatMoney, getListingAmount } from '@/utils/format';
+import { spreadPositions } from './map-spread';
 
 export function NearbyMap({ listings, region, selectedId, userCoordinates, locationUnavailable, onRegionChange, onSelect, onRequestLocation }: NearbyMapProps) {
   const mapRef = useRef<MapView>(null);
+  const positions = spreadPositions(listings);
 
   const selectListing = (listing: NearbyMapProps['listings'][number]) => {
     onSelect(listing);
@@ -22,10 +24,20 @@ export function NearbyMap({ listings, region, selectedId, userCoordinates, locat
     <View className="flex-1">
       <MapView ref={mapRef} style={{ flex: 1 }} region={region} onRegionChangeComplete={onRegionChange} showsUserLocation={Boolean(userCoordinates)} showsMyLocationButton={false}>
         {listings.map((listing) => (
-          <Marker key={listing.id} coordinate={{ latitude: listing.latitude, longitude: listing.longitude }} onPress={() => selectListing(listing)}>
-            <View className={`items-center rounded-xl border-2 border-white px-2 py-1.5 ${selectedId === listing.id ? 'bg-brand' : 'bg-navy'}`}>
-              <Ionicons name={listing.type === 'service' ? 'construct' : listing.type === 'promotion' ? 'pricetag' : listing.type === 'need' ? 'megaphone' : 'bag-handle'} size={13} color="white" />
-              <Text className="font-medium text-[10px] text-white">{formatMoney(getListingAmount(listing.price, listing.budget))}</Text>
+          <Marker key={listing.id} coordinate={positions.get(listing.id)!} onPress={() => selectListing(listing)}>
+            <View className="items-center">
+              <View className={`h-12 w-12 overflow-hidden rounded-full border-[3px] bg-white ${selectedId === listing.id ? 'border-brand' : 'border-navy'}`}>
+                {listing.ownerAvatar || listing.images[0] ? (
+                  <Image source={{ uri: listing.ownerAvatar || listing.images[0] }} style={{ width: '100%', height: '100%' }} />
+                ) : (
+                  <View className="flex-1 items-center justify-center bg-navy">
+                    <Ionicons name={listing.type === 'service' ? 'construct' : listing.type === 'promotion' ? 'pricetag' : 'bag-handle'} size={18} color="white" />
+                  </View>
+                )}
+              </View>
+              <View className={`-mt-1.5 rounded-full border-2 border-white px-1.5 py-0.5 ${selectedId === listing.id ? 'bg-brand' : 'bg-navy'}`}>
+                <Text className="font-medium text-[10px] text-white">{formatMoney(getListingAmount(listing.price, listing.budget))}</Text>
+              </View>
             </View>
           </Marker>
         ))}
