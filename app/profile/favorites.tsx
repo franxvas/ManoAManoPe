@@ -24,7 +24,7 @@ const tabs: { label: string; value: SavedType | undefined }[] = [
   { label: 'Donaciones', value: 'donation' },
   { label: 'Adopciones', value: 'adoption' },
   { label: 'Eventos', value: 'event' },
-  { label: 'Préstamos', value: 'resource' },
+  { label: 'Objetos compartidos', value: 'resource' },
   { label: 'Necesito una mano', value: 'mano' },
 ];
 

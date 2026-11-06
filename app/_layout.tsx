@@ -6,6 +6,8 @@ import {
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
+import { Image } from "expo-image";
+import { cssInterop } from "nativewind";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
@@ -15,6 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import { LocationProvider } from "@/features/location/location-provider";
 
+cssInterop(Image, { className: "style" });
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {

@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
 import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
-import { Keyboard, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Keyboard, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   ReduceMotion,
   useAnimatedStyle,
@@ -129,29 +129,29 @@ function DockItem({
         <Ionicons
           name={icon}
           size={publish ? 27 : 23}
-          color={publish ? "white" : active ? colors.navy : colors.muted}
+          color={publish ? "white" : active ? colors.red : colors.muted}
         />
       </Animated.View>
-      {!publish && active && <View style={styles.dot} />}
+      {!publish && <Text style={{fontFamily:"Inter_600SemiBold",fontSize:10,marginTop:2,color:active?colors.red:colors.muted}}>{label}</Text>}
     </Pressable>
   );
 }
 const styles = StyleSheet.create({
   position: {
     position: "absolute",
-    left: 24,
-    right: 24,
+    left: 16,
+    right: 16,
     alignItems: "center",
     zIndex: 20,
   },
   shadow: {
     width: "100%",
-    maxWidth: 360,
-    borderRadius: 34,
+    maxWidth: 440,
+    borderRadius: 24,
     ...Platform.select({web:{boxShadow:'0px 8px 24px rgba(23,40,63,0.13)'},default:{shadowColor:'#17283F',shadowOffset:{width:0,height:8},shadowOpacity:.13,shadowRadius:24,elevation:12}}),
   },
   shell: {
-    borderRadius: 34,
+    borderRadius: 24,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,.9)",
@@ -161,21 +161,21 @@ const styles = StyleSheet.create({
         : "rgba(255,255,255,.78)",
   },
   row: {
-    height: 62,
+    height: 68,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 8,
   },
-  item: { flex: 1, height: 54, alignItems: "center", justifyContent: "center" },
+  item: { flex: 1, height: 62, alignItems: "center", justifyContent: "center" },
   icon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
   active: { backgroundColor: "#EAF0F6" },
-  publish: { backgroundColor: colors.red },
+  publish: { backgroundColor: colors.red, width: 46, height: 40, borderRadius: 14 },
   dot: {
     position: "absolute",
     bottom: 0,

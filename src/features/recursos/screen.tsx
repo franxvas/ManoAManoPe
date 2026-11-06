@@ -153,13 +153,14 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScreenHeader
-        title={kind === "loan" ? "Pedir prestado" : "Alquileres"}
+        title={kind === "loan" ? "Pedir un objeto" : "Alquileres"}
         showBack
       />
       <ScrollView
         contentContainerClassName="p-5 gap-4 pb-12"
         keyboardShouldPersistTaps="handled"
       >
+        {kind === "loan" && <Text className="font-sans text-sm text-muted">Pide un objeto por un tiempo y acuerda su devolución. Esta sección no es para dinero.</Text>}
         {!!error && (
           <Text accessibilityRole="alert" className="text-brand">
             {error}
@@ -259,7 +260,7 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
           <FormField
             label={
               kind === "loan"
-                ? "Mensaje para ofrecer un préstamo"
+                ? "Mensaje para prestar el objeto"
                 : "Mensaje para solicitar el alquiler"
             }
             value={message}

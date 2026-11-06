@@ -29,7 +29,7 @@ const shortcuts: {
     terms: "ayuda reparacion presupuesto proyecto",
   },
   {
-    name: "Préstamos",
+    name: "Objetos compartidos",
     route: "/prestamos",
     icon: "swap-horizontal-outline",
     terms: "prestamo prestar",

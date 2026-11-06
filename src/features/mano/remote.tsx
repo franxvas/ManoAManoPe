@@ -1,3 +1,5 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { confirmAction } from '@/features/comunidad/confirm';
 import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { FormField } from "@/components/form-field";
 import { PrimaryButton } from "@/components/primary-button";
@@ -122,6 +124,7 @@ function errorText(e: unknown) {
   return errorMessage(e);
 }
 export function ManoRemote() {
+  const queryClient = useQueryClient();
   const { requestId, taskId } = useLocalSearchParams<{
     requestId?: string;
     taskId?: string;
@@ -571,6 +574,22 @@ export function ManoRemote() {
                 {current.title}
               </Text>
               <Text>{current.description}</Text>
+              {current.owner_id === user && <PrimaryButton label="Eliminar publicación" variant="outline" disabled={busy} onPress={() => {
+                if (busy) return;
+                const request = current;
+                void run(async () => {
+                  const confirmed = await confirmAction({ title: '¿Eliminar publicación?', message: 'Se eliminará esta solicitud y sus propuestas pendientes. No podrás recuperarla.', confirmLabel: 'Sí, eliminar' });
+                  if (!confirmed) return;
+                  await api.deleteRequest(request.id);
+                  setRequests(rows => rows.filter(row => row.id !== request.id));
+                  setCurrent(null);
+                  setTasks([]);
+                  setTask(null);
+                  show('list');
+                  router.setParams({ requestId: '', taskId: '' });
+                  await queryClient.invalidateQueries({ queryKey: ['home-mano-requests'] });
+                });
+              }} />}
               <Text>
                 Presupuesto disponible:{" "}
                 {budgetLabel(current.budget_min, current.budget_max)}
