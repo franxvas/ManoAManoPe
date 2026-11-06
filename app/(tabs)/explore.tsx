@@ -264,7 +264,8 @@ export default function ExploreScreen() {
         <View className="absolute bottom-28 left-0 right-0">
           {selected ? (
             <View className="px-5">
-              <ListingCard listing={selected} horizontal />
+              <Pressable accessibilityRole="button" onPress={() => setSelected(undefined)} className="mb-2 min-h-11 justify-center self-start rounded-full bg-white px-4"><Text className="font-medium text-xs text-navy">Ver todas</Text></Pressable>
+              <ListingCard listing={selected} mapPreview />
             </View>
           ) : (
             <ScrollView
@@ -273,9 +274,7 @@ export default function ExploreScreen() {
               contentContainerClassName="px-5"
             >
               {listings.slice(0, 5).map((item) => (
-                <Pressable key={item.id} onPress={() => selectListing(item)}>
-                  <ListingCard listing={item} horizontal />
-                </Pressable>
+                <ListingCard key={item.id} listing={item} mapPreview />
               ))}
             </ScrollView>
           )}

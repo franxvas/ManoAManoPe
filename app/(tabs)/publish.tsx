@@ -37,7 +37,7 @@ const groups: { title: string; entries: Entry[] }[] = [
     entries: [
       { label: "Una mano", icon: "hand-left-outline", href: "/mano" },
       {
-        label: "Un préstamo",
+        label: "Pedir un objeto",
         icon: "swap-horizontal-outline",
         href: "/prestamos",
       },
@@ -99,11 +99,11 @@ export default function PublishChoiceScreen() {
                   onPress={() =>
                     protect(() => router.push(entry.href), "/(tabs)/publish")
                   }
-                  className="min-h-24 w-[48%] justify-between rounded-3xl bg-white p-4"
+                  className="min-h-28 w-[48%] justify-between rounded-2xl border border-line bg-white p-4"
                   style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                 >
                   <View className="flex-row items-center justify-between">
-                    <Ionicons name={entry.icon} size={23} color={colors.navy} />
+                    <View className="h-10 w-10 items-center justify-center rounded-xl bg-red-50"><Ionicons name={entry.icon} size={23} color={colors.red} /></View>
                     <Ionicons name="add" size={17} color={colors.muted} />
                   </View>
                   <Text className="mt-3 font-medium text-sm text-navy">
@@ -114,6 +114,10 @@ export default function PublishChoiceScreen() {
             </View>
           </View>
         ))}
+        <View className="mt-6 flex-row gap-3">
+          <Pressable accessibilityRole="button" onPress={() => router.push('/agenda')} className="min-h-12 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-white px-3"><Ionicons name="calendar-outline" size={18} color={colors.navy}/><Text className="font-medium text-xs text-navy">Agenda</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/alertas')} className="min-h-12 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-white px-3"><Ionicons name="notifications-outline" size={18} color={colors.navy}/><Text className="font-medium text-xs text-navy">Mis alertas</Text></Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -15,7 +15,7 @@ const entries: {
     featured: true,
   },
   { title: "Comunidad", path: "/comunidad", icon: "people-outline" },
-  { title: "Préstamos", path: "/prestamos", icon: "swap-horizontal-outline" },
+  { title: "Objetos compartidos", path: "/prestamos", icon: "swap-horizontal-outline" },
   { title: "Alquileres", path: "/alquileres", icon: "key-outline" },
 ];
 export function CommunityShortcuts() {

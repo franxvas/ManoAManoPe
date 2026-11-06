@@ -16,3 +16,10 @@ export const listingLabels = {
   promotion: 'Promoción',
   need: 'Necesidad',
 } as const;
+
+export const listingColors = {
+  product: { foreground: '#234B70', background: '#EAF1F8' },
+  service: { foreground: '#086B58', background: '#E7F5EF' },
+  promotion: { foreground: '#B9152A', background: '#FFF0F2' },
+  need: { foreground: '#895211', background: '#FFF4DB' },
+} as const;

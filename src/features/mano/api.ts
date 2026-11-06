@@ -210,3 +210,8 @@ export async function sendMessage(id: string, userId: string, body: string) {
     .insert({ proposal_id: id, sender_id: userId, body });
   if (error) throw error;
 }
+
+export async function deleteRequest(id: string) {
+  const { error } = await client().rpc('mano_delete_request', { p_request: id });
+  if (error) throw error;
+}
