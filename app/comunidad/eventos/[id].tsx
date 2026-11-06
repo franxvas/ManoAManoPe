@@ -1,3 +1,4 @@
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { goBackOr } from "@/utils/navigation";
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -21,16 +22,13 @@ import { dayTitle } from '@/features/comunidad/eventos/components';
 import { RegistrationPanel } from '@/features/comunidad/eventos/inscripcion';
 import { categoryText, dayKey, durationText, eventPhase, phaseBadges, timeText } from '@/features/comunidad/eventos/model';
 import { levelLabels, modalityLabels } from '@/features/comunidad/talleres/model';
-import { deleteEvent, fetchEvent, fetchSavedEventIds, toggleSavedEvent } from '@/features/comunidad/eventos/api';
+import { deleteEvent, fetchEvent } from '@/features/comunidad/eventos/api';
 import { useCommunityAction } from '@/features/comunidad/use-action';
-import { useProtectedAction } from '@/hooks/use-protected-action';
 
 export default function EventDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
-  const protect = useProtectedAction();
   const query = useQuery({ queryKey: ['event', id], queryFn: () => fetchEvent(id) });
-  const saves = useQuery({ queryKey: ['event-saves', session?.user.id], queryFn: fetchSavedEventIds, enabled: Boolean(session) });
   const action = useCommunityAction([['event-saves'], ['events'], ['workshops']]);
   const event = query.data;
 
@@ -56,7 +54,6 @@ export default function EventDetail() {
   const isVirtual = event.modality === 'virtual';
   const isOrganizer = event.organizer_id === session?.user.id;
   const section = sections[isWorkshop ? 'talleres' : 'eventos'];
-  const saved = saves.data?.has(event.id) ?? false;
   const openMap = () => void Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.place}, Bagua`)}`);
 
   return (
@@ -109,15 +106,7 @@ export default function EventDetail() {
                 <Text className="ml-2 font-medium text-sm text-navy">Ver ubicación</Text>
               </Pressable>
             )}
-            <Pressable
-              accessibilityRole="button"
-              disabled={action.busy}
-              onPress={() => protect(() => void action.run(() => toggleSavedEvent(event.id, saved), { success: saved ? 'Lo quitaste de tus guardados.' : 'Evento guardado.' }))}
-              className={`h-12 flex-1 flex-row items-center justify-center rounded-2xl ${saved ? 'bg-navy' : 'border border-navy'}`}
-            >
-              <Ionicons name={saved ? 'bookmark' : 'bookmark-outline'} size={18} color={saved ? colors.white : colors.navy} />
-              <Text className={`ml-2 font-medium text-sm ${saved ? 'text-white' : 'text-navy'}`}>{saved ? 'Guardado' : 'Guardar evento'}</Text>
-            </Pressable>
+<FavoriteButton type="event" id={event.id} label />
           </View>
           <ActionFeedback error={action.error} notice={action.notice} />
         </DetailSheet>

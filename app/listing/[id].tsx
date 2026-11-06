@@ -1,3 +1,4 @@
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -12,7 +13,6 @@ import { EmptyState } from '@/components/empty-state';
 import { PrimaryButton } from '@/components/primary-button';
 import { colors, listingLabels } from '@/constants/theme';
 import { useProtectedAction } from '@/hooks/use-protected-action';
-import { useFavorites } from '@/hooks/use-favorites';
 import { useAuth } from '@/features/auth/auth-provider';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { fetchListing } from '@/services/listings';
@@ -27,7 +27,6 @@ export default function ListingDetailScreen() {
   const localListing = useAppStore((state) => state.listings.find((item) => item.id === id));
   const remote = useQuery({ queryKey: ['listing', id], queryFn: () => fetchListing(id), enabled: isSupabaseConfigured && Boolean(id) });
   const listing = isSupabaseConfigured ? remote.data : localListing;
-  const { favorites, toggleFavorite } = useFavorites();
   const openConversation = useAppStore((state) => state.openConversation);
   const sendOffer = useAppStore((state) => state.sendOffer);
   const protect = useProtectedAction();
@@ -35,7 +34,6 @@ export default function ListingDetailScreen() {
   const [offerVisible, setOfferVisible] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [actionError, setActionError] = useState('');
-  const favorite = listing ? favorites.includes(listing.id) : false;
   const ownListing = Boolean(listing && session?.user.id === listing.ownerId);
   const amount = useMemo(() => listing ? getListingAmount(listing.price, listing.budget) : undefined, [listing]);
 
@@ -64,9 +62,6 @@ export default function ListingDetailScreen() {
       setActionError(error instanceof Error ? error.message : 'No se pudo abrir la conversación.');
     }
   }, `/listing/${listing.id}`);
-  const toggleCurrentFavorite = () => protect(() => {
-    void toggleFavorite(listing.id).catch((error) => setActionError(error instanceof Error ? error.message : 'No se pudo actualizar el favorito.'));
-  }, `/listing/${listing.id}`);
   const submitOffer = async () => {
     const parsed = Number(offerAmount.replace(',', '.'));
     if (!Number.isFinite(parsed) || parsed <= 0) return;
@@ -85,7 +80,7 @@ export default function ListingDetailScreen() {
     <SafeAreaView edges={['top']} className="flex-1 bg-white">
       <View className="absolute left-4 right-4 top-14 z-10 flex-row justify-between">
         <Pressable onPress={() => goBackOr('/(tabs)')} className="h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow"><Ionicons name="arrow-back" size={24} color={colors.navy} /></Pressable>
-        <Pressable onPress={toggleCurrentFavorite} className="h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow"><Ionicons name={favorite ? 'heart' : 'heart-outline'} size={24} color={colors.red} /></Pressable>
+        <FavoriteButton type="listing" id={listing.id} />
       </View>
       <ScrollView contentContainerClassName="pb-32" showsVerticalScrollIndicator={false}>
         <FlatList horizontal pagingEnabled data={listing.images.length ? listing.images : ['']} keyExtractor={(_, index) => String(index)} renderItem={({ item }) => item ? <Image source={{ uri: item }} style={{ width, height: 330 }} contentFit="cover" /> : <View style={{ width, height: 330 }} className="bg-slate-200" />} showsHorizontalScrollIndicator={false} />
@@ -108,7 +103,7 @@ export default function ListingDetailScreen() {
           <PrimaryButton label="Editar mi publicación" className="flex-1" onPress={() => router.push({ pathname: '/publish/[type]', params: { type: listing.type, listingId: listing.id } })} />
         ) : (
           <View className="flex-1 flex-row gap-2">
-            <Pressable onPress={toggleCurrentFavorite} className="h-14 w-14 items-center justify-center rounded-2xl border border-line"><Ionicons name={favorite ? 'heart' : 'heart-outline'} size={24} color={colors.red} /></Pressable>
+            <FavoriteButton type="listing" id={listing.id} />
             <PrimaryButton label="Contactar" variant="secondary" className="flex-1" onPress={contact} />
             <PrimaryButton label="Hacer oferta" className="flex-1" onPress={() => protect(() => { setOfferAmount(amount ? String(Math.round(amount * 0.9)) : ''); setOfferVisible(true); }, `/listing/${listing.id}`)} />
           </View>

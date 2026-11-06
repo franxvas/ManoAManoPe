@@ -1,11 +1,10 @@
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { colors, listingLabels } from "@/constants/theme";
-import { useFavorites } from "@/hooks/use-favorites";
-import { useProtectedAction } from "@/hooks/use-protected-action";
 import type { Listing } from "@/types/domain";
 import { formatMoney, getListingAmount } from "@/utils/format";
 
@@ -16,9 +15,6 @@ export function ListingCard({
   listing: Listing;
   horizontal?: boolean;
 }) {
-  const { favorites, toggleFavorite } = useFavorites();
-  const protect = useProtectedAction();
-  const favorite = favorites.includes(listing.id);
   const image = listing.images[0];
 
   return (
@@ -46,29 +42,7 @@ export function ListingCard({
             {listingLabels[listing.type]}
           </Text>
         </View>
-        <Pressable
-          onPress={(event) => {
-            event.stopPropagation();
-            protect(() => {
-              void toggleFavorite(listing.id).catch(() =>
-                Alert.alert(
-                  "Favoritos",
-                  "No se pudo actualizar el favorito. Inténtalo otra vez.",
-                ),
-              );
-            }, `/listing/${listing.id}`);
-          }}
-          className="absolute right-3 top-3 h-9 w-9 items-center justify-center rounded-full bg-white/95"
-          accessibilityLabel={
-            favorite ? "Quitar de favoritos" : "Agregar a favoritos"
-          }
-        >
-          <Ionicons
-            name={favorite ? "heart" : "heart-outline"}
-            size={21}
-            color={colors.red}
-          />
-        </Pressable>
+<View className="absolute right-3 top-3"><FavoriteButton type="listing" id={listing.id} size="sm" returnTo={`/listing/${listing.id}`} /></View>
       </View>
       <View className="p-3.5">
         <Text className="font-medium text-sm text-ink" numberOfLines={1}>

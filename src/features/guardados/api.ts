@@ -10,6 +10,7 @@ export interface SavedEntry {
   subtitle: string;
   photo: string | null;
   savedAt: string;
+  resourceKind?: 'loan' | 'rental';
 }
 
 export async function fetchSavedIds(type: SavedType) {
@@ -54,19 +55,19 @@ export async function fetchSavedEntries(): Promise<SavedEntry[]> {
     query('donations', 'id, title, zone, photos', 'donation'),
     query('adoptions', 'id, pet_name, zone, photos', 'adoption'),
     query('community_events', 'id, title, kind, place, photo, starts_at', 'event'),
-    query('resource_posts', 'id, title, zone, photos', 'resource'),
+    query('resource_posts', 'id, title, zone, photos, kind', 'resource'),
     query('mano_requests', 'id, title, category, photos', 'mano'),
   ]);
 
   const details = new Map<string, Omit<SavedEntry, 'savedAt'>>();
-  const add = (type: SavedType, id: string, title: string, subtitle: string, photo: string | null) =>
-    details.set(`${type}:${id}`, { type, id, title, subtitle: `${labels[type]} · ${subtitle}`, photo });
+  const add = (type: SavedType, id: string, title: string, subtitle: string, photo: string | null, resourceKind?: 'loan' | 'rental') =>
+    details.set(`${type}:${id}`, { type, id, title, subtitle: `${labels[type]} · ${subtitle}`, photo, resourceKind });
 
   listings.map(mapListingRow).forEach((item) => add('listing', item.id, item.title, item.ownerName, item.images[0] ?? null));
   donations.forEach((row) => add('donation', row.id, row.title, row.zone, row.photos[0] ? photoUrl(row.photos[0]) : null));
   adoptions.forEach((row) => add('adoption', row.id, row.pet_name, row.zone, row.photos[0] ? photoUrl(row.photos[0]) : null));
   events.forEach((row) => add('event', row.id, row.title, row.place, row.photo ? photoUrl(row.photo) : null));
-  resources.forEach((row) => add('resource', row.id, row.title, row.zone, row.photos?.[0] ? photoUrl(row.photos[0]) : null));
+  resources.forEach((row) => add('resource', row.id, row.title, row.zone, row.photos?.[0] ? photoUrl(row.photos[0]) : null, row.kind));
   manos.forEach((row) => add('mano', row.id, row.title, row.category, row.photos?.[0]?.startsWith('http') ? row.photos[0] : null));
 
   return saved.flatMap((row) => {
