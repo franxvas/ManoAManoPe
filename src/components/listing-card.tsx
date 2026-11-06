@@ -33,7 +33,7 @@ export function ListingCard({ listing, horizontal = false, compact = false, mapP
         <View style={{ backgroundColor: palette.background }} className="absolute left-2 top-2 rounded-lg px-2 py-1">
           <Text style={{ color: palette.foreground }} className="font-medium text-[10px] uppercase tracking-wide">{listingLabels[listing.type]}</Text>
         </View>
-        <View className="absolute right-1 top-1"><FavoriteButton type="listing" id={listing.id} /></View>
+        <View className="absolute right-1 top-1"><FavoriteButton type="listing" id={listing.id} returnTo={`/listing/${listing.id}`} /></View>
       </View>
       <View className={compact ? 'p-2.5' : 'p-3.5'}>
         <Text className={`font-display text-ink ${compact ? 'h-9 text-sm leading-[18px]' : 'text-lg'}`} numberOfLines={compact ? 2 : 1}>{listing.title}</Text>

@@ -1,7 +1,8 @@
+import { savedRoute } from '@/features/guardados/navigation';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { router, type Href } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +13,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
 import { FilterChips } from '@/features/comunidad/components';
-import { fetchSavedEntries, type SavedEntry, type SavedType } from '@/features/guardados/api';
+import { fetchSavedEntries, type SavedType } from '@/features/guardados/api';
 import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useListings } from '@/hooks/use-listings';
@@ -37,13 +38,6 @@ const icons: Record<SavedType, keyof typeof Ionicons.glyphMap> = {
   mano: 'hand-left-outline',
 };
 
-function routeFor(entry: SavedEntry): Href {
-  if (entry.type === 'listing') return { pathname: '/listing/[id]', params: { id: entry.id } };
-  if (entry.type === 'donation') return { pathname: '/comunidad/donaciones/[id]', params: { id: entry.id } };
-  if (entry.type === 'adoption') return { pathname: '/comunidad/adopciones/[id]', params: { id: entry.id } };
-  if (entry.type === 'event') return { pathname: '/comunidad/eventos/[id]', params: { id: entry.id } };
-  return entry.type === 'resource' ? '/prestamos' : '/mano';
-}
 
 export default function SavedScreen() {
   return (
@@ -79,7 +73,7 @@ function SavedList() {
         )
       }
       renderItem={({ item }) => (
-        <Pressable accessibilityRole="button" onPress={() => router.push(routeFor(item))} className="flex-row items-center rounded-2xl bg-white p-3">
+        <Pressable accessibilityRole="button" onPress={() => router.push(savedRoute(item))} className="flex-row items-center rounded-2xl bg-white p-3">
           {item.photo ? (
             <Image source={{ uri: item.photo }} style={{ width: 64, height: 64, borderRadius: 14 }} contentFit="cover" />
           ) : (

@@ -2,7 +2,7 @@ import { Disclosure } from "@/components/disclosure";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/screen-header";
 import { FormField } from "@/components/form-field";
@@ -37,6 +37,7 @@ interface Response {
   status: string;
 }
 export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
+  const { postId } = useLocalSearchParams<{ postId?: string }>();
   const { session } = useAuth();
   const user = session?.user.id;
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -53,17 +54,14 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
     [busy, B] = useState(false),
     [error, X] = useState("");
   const query = useQuery({
-    queryKey: ["resource-posts", kind, user],
+    queryKey: ["resource-posts", kind, user, postId],
     queryFn: async () => {
       if (!supabase)
         throw new Error("Conecta tu cuenta para usar esta sección.");
+      const postQuery = supabase.from("resource_posts").select("*").eq("kind", kind).order("created_at", { ascending: false }).limit(100);
+      if (postId) postQuery.eq("id", postId);
       const [posts, responses] = await Promise.all([
-        supabase
-          .from("resource_posts")
-          .select("*")
-          .eq("kind", kind)
-          .order("created_at", { ascending: false })
-          .limit(100),
+        postQuery,
         user
           ? supabase.from("resource_responses").select("*")
           : Promise.resolve({ data: [], error: null }),
@@ -253,9 +251,8 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
           </Disclosure>
         )}
         {query.isLoading && <Text>Cargando publicaciones…</Text>}
-        {query.data?.posts.length === 0 && (
-          <Text className="text-muted">Todavía no hay publicaciones.</Text>
-        )}
+        {query.data?.posts.length === 0 && <Text className="text-muted">{postId ? 'Este contenido ya no está disponible.' : 'Todavía no hay publicaciones.'}</Text>}
+        {!!postId && <PrimaryButton variant="outline" label={kind === 'loan' ? 'Ver todos los préstamos' : 'Ver todos los alquileres'} onPress={() => router.replace(kind === 'loan' ? '/prestamos' : '/alquileres')} />}
         {!!user && (
           <FormField
             label={
@@ -269,7 +266,7 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
             maxLength={1000}
           />
         )}
-        {query.data?.posts.map((p) => (
+        {query.data?.posts.filter((p) => !postId || p.id === postId).map((p) => (
           <View key={p.id} className="gap-3 rounded-2xl bg-white p-4">
             <View className="flex-row items-start">
               <Text className="flex-1 font-display text-xl text-navy">{p.title}</Text>

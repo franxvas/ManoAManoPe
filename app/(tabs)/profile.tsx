@@ -37,7 +37,7 @@ const menuItems: {
     route: "/profile/my-listings",
   },
   {
-    label: "Favoritos",
+    label: "Mis guardados",
     icon: "heart-outline",
     route: "/profile/favorites",
   },
