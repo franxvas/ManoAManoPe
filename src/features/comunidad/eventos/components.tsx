@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { colors } from '@/constants/theme';
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { photoUrl } from '../api';
 import { StatusBadge } from '../components';
 import { sections } from '../theme';
@@ -67,6 +68,9 @@ export function EventCard({ event, onPress, showDate = false }: { event: Communi
         <View className="mt-2 flex-row gap-2">
           <StatusBadge label={categoryText(event)} tone={event.kind === 'workshop' ? 'green' : 'red'} />
           <StatusBadge {...phaseBadges[eventPhase(event)]} />
+          <View className="ml-auto">
+            <FavoriteButton type="event" id={event.id} size="sm" />
+          </View>
         </View>
       </View>
     </Pressable>

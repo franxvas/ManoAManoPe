@@ -19,11 +19,13 @@ import { PrimaryButton } from "@/components/primary-button";
 import { FormField } from "@/components/form-field";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/features/auth/auth-provider";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { trustRpc } from "@/features/confianza/api";
 import { readWorks, saveWork } from "@/features/portafolio/api";
 import { PhotoKind, validateWork } from "@/features/portafolio/model";
 import { isSupabaseConfigured } from "@/lib/supabase";
 export default function EditWork() {
+  const authReady = useRequireAuth("/portafolio/editar");
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { session } = useAuth();
   const owner = session?.user.id;
@@ -123,6 +125,7 @@ export default function EditWork() {
       setBusy(false);
     }
   }
+  if (!authReady) return null;
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScreenHeader title={id ? "Editar trabajo" : "Añadir trabajo"} showBack />

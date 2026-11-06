@@ -15,6 +15,7 @@ import { errorMessage } from "@/utils/errors";
 import { Image } from "expo-image";
 import { PhotoPicker, type Photo } from "@/features/comunidad/components";
 import { photoUrl, uploadPhotos } from "@/features/comunidad/api";
+import { FavoriteButton } from "@/features/guardados/favorite-button";
 interface Post {
   photos: string[];
   id: string;
@@ -269,7 +270,10 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
         )}
         {query.data?.posts.map((p) => (
           <View key={p.id} className="gap-3 rounded-2xl bg-white p-4">
-            <Text className="font-display text-xl text-navy">{p.title}</Text>
+            <View className="flex-row items-start">
+              <Text className="flex-1 font-display text-xl text-navy">{p.title}</Text>
+              <FavoriteButton type="resource" id={p.id} size="sm" />
+            </View>
             {p.photos?.map((path) => (
               <Image
                 key={path}

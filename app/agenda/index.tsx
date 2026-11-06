@@ -9,6 +9,7 @@ import { PrimaryButton } from "@/components/primary-button";
 import { FormField } from "@/components/form-field";
 import { ChoiceChips } from "@/features/comunidad/components";
 import { useAuth } from "@/features/auth/auth-provider";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import {
   agendaData,
   agendaAction,
@@ -16,12 +17,14 @@ import {
 } from "@/features/agenda/api";
 import { errorMessage } from "@/utils/errors";
 export default function Agenda() {
+  const authReady = useRequireAuth("/agenda");
   const { session } = useAuth();
   const user = session?.user.id;
   const query = useQuery({
     queryKey: ["agenda", user],
     queryFn: agendaData,
-    enabled: !!user,
+    // Solo ejecuta la query cuando el usuario está autenticado
+    enabled: authReady && !!user,
   });
   const [service, S] = useState(""),
     [day, D] = useState(""),
@@ -58,6 +61,7 @@ export default function Agenda() {
     completed: "Realizada",
     cancelled: "Cancelada",
   };
+  if (!authReady) return null;
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScreenHeader title="Agenda" showBack />

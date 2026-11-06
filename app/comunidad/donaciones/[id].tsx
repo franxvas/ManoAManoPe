@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { ActionFeedback, DetailSheet, InfoRow, OwnerCard, PhotoGallery, QuickFacts, StatusBadge } from '@/features/comunidad/components';
 import { DonationRequestsPanel } from '@/features/comunidad/donaciones/solicitudes';
 import { deleteDonation, fetchDonation } from '@/features/comunidad/donaciones/api';
@@ -43,7 +44,10 @@ export default function DonationDetail() {
           <PhotoGallery paths={donation.photos} />
           <DetailSheet>
             <StatusBadge {...donationStatus[donation.status]} />
-            <Text className="mt-3 font-display text-[26px] leading-8 text-navy">{donation.title}</Text>
+            <View className="mt-3 flex-row items-start">
+              <Text className="flex-1 font-display text-[26px] leading-8 text-navy">{donation.title}</Text>
+              <FavoriteButton type="donation" id={donation.id} />
+            </View>
             <QuickFacts
               color={sections.donaciones.color}
               facts={[

@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/auth-provider';
+import { FavoriteButton } from '@/features/guardados/favorite-button';
 import { AdoptionRequestsPanel } from '@/features/comunidad/adopciones/solicitudes';
 import { deleteAdoption, fetchAdoption } from '@/features/comunidad/adopciones/api';
 import { adoptionStatus, sizeLabels, speciesLabels } from '@/features/comunidad/adopciones/model';
@@ -43,7 +44,10 @@ export default function AdoptionDetail() {
           <PhotoGallery paths={adoption.photos} />
           <DetailSheet>
             <StatusBadge {...adoptionStatus[adoption.status]} />
-            <Text className="mt-3 font-display text-[28px] leading-8 text-navy">{adoption.pet_name}</Text>
+            <View className="mt-3 flex-row items-start">
+              <Text className="flex-1 font-display text-[28px] leading-8 text-navy">{adoption.pet_name}</Text>
+              <FavoriteButton type="adoption" id={adoption.id} />
+            </View>
             <QuickFacts
               color={sections.adopciones.color}
               facts={[

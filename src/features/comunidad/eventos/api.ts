@@ -1,3 +1,5 @@
+import { fetchSavedIds, setSaved } from '@/features/guardados/api';
+
 import { db, rpc, uploadPhotos } from '../api';
 import type { CommunityEvent } from './model';
 
@@ -32,10 +34,9 @@ export async function deleteEvent(id: string) {
   if (error) throw error;
 }
 
+// Los eventos guardados usan la tabla única de guardados.
 export async function fetchSavedEventIds() {
-  const { data, error } = await db().from('event_saves').select('event_id');
-  if (error) throw error;
-  return new Set((data ?? []).map((row) => String(row.event_id)));
+  return new Set(await fetchSavedIds('event'));
 }
 
 export async function isRegistered(eventId: string, userId: string) {
@@ -68,9 +69,4 @@ export const setAttendance = (registrationId: string, attended: boolean) => rpc(
 export const registerForEvent = (eventId: string) => rpc<string>('register_for_event', { p_event: eventId });
 export const cancelRegistration = (eventId: string) => rpc('cancel_event_registration', { p_event: eventId });
 
-export async function toggleSavedEvent(eventId: string, saved: boolean) {
-  const { error } = saved
-    ? await db().from('event_saves').delete().eq('event_id', eventId)
-    : await db().from('event_saves').insert({ event_id: eventId });
-  if (error) throw error;
-}
+export const toggleSavedEvent = (eventId: string, saved: boolean) => setSaved('event', eventId, !saved);

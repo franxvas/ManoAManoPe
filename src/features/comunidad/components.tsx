@@ -12,6 +12,8 @@ import {
 } from "react-native";
 
 import { Avatar } from "@/components/avatar";
+import type { SavedType } from "@/features/guardados/api";
+import { FavoriteButton } from "@/features/guardados/favorite-button";
 import { colors } from "@/constants/theme";
 import { photoUrl } from "./api";
 import { sections, type SectionKey } from "./theme";
@@ -302,6 +304,7 @@ export function CommunityCard({
   owner,
   badge,
   section,
+  saved,
   onPress,
 }: {
   photo?: string;
@@ -311,6 +314,7 @@ export function CommunityCard({
   owner: string;
   badge: { label: string; tone: Tone };
   section: SectionKey;
+  saved: { type: SavedType; id: string };
   onPress: () => void;
 }) {
   const accent = sections[section];
@@ -337,6 +341,9 @@ export function CommunityCard({
       )}
       <View className="absolute left-3 top-3">
         <StatusBadge {...badge} />
+      </View>
+      <View className="absolute right-3 top-3">
+        <FavoriteButton type={saved.type} id={saved.id} size="sm" />
       </View>
       <View className="p-4">
         <Text

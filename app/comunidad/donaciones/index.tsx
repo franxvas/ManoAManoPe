@@ -114,6 +114,7 @@ export default function DonationsScreen() {
           renderItem={({ item }) => (
             <CommunityCard
               section="donaciones"
+              saved={{ type: 'donation', id: item.id }}
               photo={item.photos[0]}
               title={item.title}
               subtitle={`${conditionLabels[item.condition]} · ${item.quantity} ${item.quantity === 1 ? "unidad" : "unidades"} · Gratis`}
