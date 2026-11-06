@@ -1,3 +1,4 @@
+import { Disclosure } from "@/components/disclosure";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { router } from "expo-router";
@@ -63,7 +64,7 @@ export default function Agenda() {
   if (!authReady) return null;
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
-      <ScreenHeader title="Agenda de servicios" showBack />
+      <ScreenHeader title="Agenda" showBack />
       <ScrollView
         contentContainerClassName="p-5 gap-4 pb-12"
         keyboardShouldPersistTaps="handled"
@@ -95,10 +96,7 @@ export default function Agenda() {
             )}
             {!!data && (
               <>
-                <View className="rounded-2xl bg-white p-4">
-                  <Text className="mb-3 font-display text-xl text-navy">
-                    Mis horarios de atención
-                  </Text>
+                <Disclosure title="Mi disponibilidad">
                   <ChoiceChips
                     label="Servicio propio"
                     options={Object.fromEntries(
@@ -145,7 +143,7 @@ export default function Agenda() {
                       })
                     }
                   />
-                </View>
+                </Disclosure>
                 <View className="rounded-2xl bg-white p-4">
                   <Text className="mb-3 font-display text-xl text-navy">
                     Horarios disponibles

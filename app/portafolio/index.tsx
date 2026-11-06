@@ -1,4 +1,4 @@
-import { errorMessage } from '@/utils/errors';
+import { errorMessage } from "@/utils/errors";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
@@ -30,12 +30,8 @@ export default function PortfolioList() {
   });
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
-      <ScreenHeader title="Portafolio de trabajos" showBack />
+      <ScreenHeader title="Portafolio" showBack />
       <View className="px-5 py-3 gap-3">
-        <Text className="text-sm text-muted">
-          Los trabajos manuales no acreditan una operación. El distintivo de
-          servicio confirmado se calcula desde acuerdos completados con código.
-        </Text>
         {mine && (
           <PrimaryButton
             label="Añadir trabajo"

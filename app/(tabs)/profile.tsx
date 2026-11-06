@@ -9,7 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase";
 import { TrustSummary } from "@/features/confianza/summary";
 import { PublicReviews } from "@/features/confianza/reviews";
 import { Avatar } from "@/components/avatar";
-import { BrandLogo } from "@/components/brand-logo";
+import { ScreenHeader } from "@/components/screen-header";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/features/auth/auth-provider";
 import { useListings } from "@/hooks/use-listings";
@@ -130,22 +130,12 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScrollView
-        contentContainerClassName="pb-28"
+        contentContainerClassName="pb-36"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-row items-center justify-between bg-white px-5 pb-3 pt-2">
-          <BrandLogo compact />
+        <ScreenHeader title="Perfil" />
 
-          <Pressable onPress={() => router.push("/notifications")}>
-            <Ionicons
-              name="notifications-outline"
-              size={25}
-              color={colors.navy}
-            />
-          </Pressable>
-        </View>
-
-        <View className="relative h-40 bg-navy">
+        <View className="relative mx-5 h-28 overflow-hidden rounded-3xl bg-navy">
           {Boolean(profile.coverUrl) && (
             <Image
               source={{ uri: profile.coverUrl }}
@@ -155,13 +145,13 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        <View className="bg-white px-5 pb-6">
-          <View className="-mt-12 flex-row items-end justify-between">
+        <View className="mx-5 rounded-b-3xl bg-white px-4 pb-5">
+          <View className="-mt-8 flex-row items-end justify-between">
             <View className="rounded-full border-4 border-white">
               <Avatar
                 uri={profile.avatarUrl}
                 name={profile.displayName}
-                size={94}
+                size={76}
               />
             </View>
 
@@ -196,7 +186,7 @@ export default function ProfileScreen() {
               value={
                 isSupabaseConfigured ? profile.ratingAverage.toFixed(1) : "—"
               }
-              label="Rating"
+              label="Valoración"
             />
 
             <Stat
@@ -210,12 +200,12 @@ export default function ProfileScreen() {
         <View className="px-5 py-3">
           <TrustSummary ownerId={profile.id} />
           <PrimaryButton
-            label="Mi portafolio de trabajos"
+            label="Portafolio"
             onPress={() => router.push("/portafolio")}
           />
           <PublicReviews ownerId={profile.id} />
         </View>
-        <View className="mt-3 bg-white px-5 py-2">
+        <View className="mx-5 mt-3 rounded-3xl bg-white px-4 py-2">
           {menuItems.map((item) => (
             <Pressable
               key={item.label}

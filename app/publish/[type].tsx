@@ -571,7 +571,7 @@ function PublishFormContent({
 
   const title = existing
     ? `Editar ${listingLabels[type]}`
-    : `Publicar Nuevo ${listingLabels[type]}`;
+    : listingLabels[type];
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">

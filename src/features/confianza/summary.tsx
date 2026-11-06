@@ -14,9 +14,7 @@ export function TrustSummary({ ownerId }: { ownerId: string }) {
   });
   return (
     <View className="my-4 gap-3 rounded-2xl border border-line bg-white p-4">
-      <Text className="font-display text-xl text-navy">
-        Actividad y confianza
-      </Text>
+      <Text className="font-display text-xl text-navy">Actividad</Text>
       {!isSupabaseConfigured ? (
         <Text className="text-muted">
           Modo demostración: no se acredita identidad, antigüedad ni reputación
@@ -50,7 +48,7 @@ export function TrustSummary({ ownerId }: { ownerId: string }) {
             <Text className="text-ink">
               {query.data.review_count
                 ? `${query.data.review_average.toFixed(1)} de 5 · ${query.data.review_count} reseñas válidas`
-                : "Todavía no hay reseñas de operaciones completadas"}
+                : "Sin reseñas todavía"}
             </Text>
             {badges(query.data).map((badge) => (
               <Text
@@ -60,12 +58,6 @@ export function TrustSummary({ ownerId }: { ownerId: string }) {
                 {badge}
               </Text>
             ))}
-            <Text className="text-xs leading-5 text-muted">
-              Servicios: finalizados mediante confirmación de ambas partes. Los
-              indicadores de préstamos y alquileres se mostrarán cuando sus
-              módulos aporten operaciones verificables. Ninguna insignia
-              acredita identidad ni pagos.
-            </Text>
           </>
         )
       )}
