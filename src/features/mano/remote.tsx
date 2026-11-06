@@ -562,6 +562,7 @@ export function ManoRemote() {
         {screen === "detail" && current && (
           <>
             <View style={card}>
+              <View className="mb-3 self-end"><FavoriteButton type="mano" id={current.id} returnTo={`/mano?requestId=${current.id}`} /></View>
               <Text style={{ color: "#d7192d" }}>
                 {labels[current.kind]} · {current.category}
               </Text>
