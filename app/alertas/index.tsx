@@ -68,9 +68,8 @@ export default function Alerts() {
           />
         ) : (
           <>
-            <Text className="text-muted">
-              Guarda una búsqueda desde Explorar. Las coincidencias nuevas se
-              actualizan al consultar esta sección; no se envían avisos push.
+            <Text className="text-xs text-muted">
+              Coincidencias de tus búsquedas guardadas.
             </Text>
             {(!!error || query.isError) && (
               <Text className="text-brand">

@@ -1,49 +1,119 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router, type Href } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { CommunityShortcuts } from '@/components/community-shortcuts';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { PrimaryButton } from '@/components/primary-button';
-import { colors } from '@/constants/theme';
-import { useAuth } from '@/features/auth/auth-provider';
-import type { ListingType } from '@/types/domain';
-
-const choices: { type: ListingType; title: string; description: string; icon: keyof typeof Ionicons.glyphMap; tint: string }[] = [
-  { type: 'product', title: 'Producto', description: 'Vende algo nuevo o usado', icon: 'bag-handle-outline', tint: '#EAF0F8' },
-  { type: 'service', title: 'Servicio', description: 'Ofrece tu experiencia', icon: 'construct-outline', tint: '#FDECEE' },
-  { type: 'promotion', title: 'Promoción', description: 'Comparte una oferta especial', icon: 'pricetag-outline', tint: '#FFF5D9' },
-  { type: 'need', title: 'Necesidad', description: 'Publica lo que estás buscando', icon: 'megaphone-outline', tint: '#E7F7EF' },
+import { Ionicons } from "@expo/vector-icons";
+import { router, type Href } from "expo-router";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenHeader } from "@/components/screen-header";
+import { colors } from "@/constants/theme";
+import { useProtectedAction } from "@/hooks/use-protected-action";
+type Entry = {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  href: Href;
+};
+const groups: { title: string; entries: Entry[] }[] = [
+  {
+    title: "Ofrecer",
+    entries: [
+      {
+        label: "Producto",
+        icon: "bag-handle-outline",
+        href: "/publish/product",
+      },
+      {
+        label: "Servicio",
+        icon: "construct-outline",
+        href: "/publish/service",
+      },
+      {
+        label: "Promoción",
+        icon: "pricetag-outline",
+        href: "/publish/promotion",
+      },
+      { label: "Alquiler", icon: "key-outline", href: "/alquileres" },
+    ],
+  },
+  {
+    title: "Pedir",
+    entries: [
+      { label: "Una mano", icon: "hand-left-outline", href: "/mano" },
+      {
+        label: "Un préstamo",
+        icon: "swap-horizontal-outline",
+        href: "/prestamos",
+      },
+    ],
+  },
+  {
+    title: "Compartir",
+    entries: [
+      {
+        label: "Donación",
+        icon: "gift-outline",
+        href: "/comunidad/donaciones/nueva",
+      },
+      {
+        label: "Adopción",
+        icon: "paw-outline",
+        href: "/comunidad/adopciones/nueva",
+      },
+    ],
+  },
+  {
+    title: "Organizar",
+    entries: [
+      {
+        label: "Evento o campaña",
+        icon: "calendar-outline",
+        href: "/comunidad/eventos/nuevo",
+      },
+      {
+        label: "Taller",
+        icon: "school-outline",
+        href: {
+          pathname: "/comunidad/eventos/nuevo",
+          params: { kind: "workshop" },
+        },
+      },
+    ],
+  },
 ];
-
 export default function PublishChoiceScreen() {
-  const { isAuthenticated } = useAuth();
+  const protect = useProtectedAction();
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
-      <ScrollView contentContainerClassName="px-5 pt-5 pb-12">
-      <Text className="font-display text-3xl text-navy">¿Qué quieres publicar?</Text>
-      <Text className="mt-2 font-sans text-base text-muted">Elige una opción para empezar</Text>
-      <Pressable onPress={() => router.push('/mano' as Href)} className="mt-5 rounded-2xl bg-white p-4"><Text className="font-display text-xl text-navy">Necesito una mano →</Text><Text className="mt-1 font-sans text-sm text-muted">Solicitudes, reparaciones y proyectos · vista previa</Text></Pressable>
-      {!isAuthenticated ? (
-        <View className="mt-14 rounded-3xl bg-white p-7">
-          <View className="mb-5 h-14 w-14 items-center justify-center rounded-2xl bg-red-50"><Ionicons name="lock-closed-outline" size={27} color={colors.red} /></View>
-          <Text className="font-display text-2xl text-navy">Inicia sesión para publicar</Text>
-          <Text className="mb-6 mt-2 font-sans leading-6 text-muted">Tu perfil ayuda a que la comunidad sepa con quién está haciendo un trato.</Text>
-          <PrimaryButton label="Iniciar sesión" onPress={() => router.push({ pathname: '/(auth)/login', params: { returnTo: '/(tabs)/publish' } })} />
-        </View>
-      ) : (
-        <View className="mt-8 flex-row flex-wrap justify-between gap-y-4">
-          {choices.map((choice) => (
-            <Pressable key={choice.type} onPress={() => router.push({ pathname: '/publish/[type]', params: { type: choice.type } })} className="min-h-48 w-[48%] rounded-3xl bg-white p-5">
-              <View className="h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: choice.tint }}><Ionicons name={choice.icon} size={28} color={colors.navy} /></View>
-              <Text className="mt-5 font-display text-2xl text-navy">{choice.title}</Text>
-              <Text className="mt-2 font-sans text-sm leading-5 text-muted">{choice.description}</Text>
-              <Ionicons name="arrow-forward-circle" size={25} color={colors.red} style={{ marginTop: 12 }} />
-            </Pressable>
-          ))}
-        </View>
-      )}
-      <CommunityShortcuts />
+    <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
+      <ScreenHeader title="Publicar" />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="px-5 pb-36"
+      >
+        {groups.map((group) => (
+          <View key={group.title} className="mt-4">
+            <Text className="mb-3 font-medium text-xs uppercase tracking-widest text-muted">
+              {group.title}
+            </Text>
+            <View className="flex-row flex-wrap justify-between gap-y-3">
+              {group.entries.map((entry) => (
+                <Pressable
+                  key={entry.label}
+                  accessibilityRole="button"
+                  onPress={() =>
+                    protect(() => router.push(entry.href), "/(tabs)/publish")
+                  }
+                  className="min-h-24 w-[48%] justify-between rounded-3xl bg-white p-4"
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Ionicons name={entry.icon} size={23} color={colors.navy} />
+                    <Ionicons name="add" size={17} color={colors.muted} />
+                  </View>
+                  <Text className="mt-3 font-medium text-sm text-navy">
+                    {entry.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

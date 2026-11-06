@@ -1,3 +1,4 @@
+import { Disclosure } from "@/components/disclosure";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -11,9 +12,9 @@ import { SelectField } from "@/components/select-field";
 import { useAuth } from "@/features/auth/auth-provider";
 import { supabase } from "@/lib/supabase";
 import { errorMessage } from "@/utils/errors";
-import { Image } from 'expo-image';
-import { PhotoPicker, type Photo } from '@/features/comunidad/components';
-import { photoUrl, uploadPhotos } from '@/features/comunidad/api';
+import { Image } from "expo-image";
+import { PhotoPicker, type Photo } from "@/features/comunidad/components";
+import { photoUrl, uploadPhotos } from "@/features/comunidad/api";
 interface Post {
   photos: string[];
   id: string;
@@ -119,23 +120,22 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
         guarantee < 0)
     )
       throw new Error("Revisa el precio y la garantía.");
-    if(kind==='rental'&&!photos.length)throw new Error('Añade al menos una foto del objeto.');
-    const paths = await uploadPhotos('recursos',photos);
-    const result = await supabase!
-      .from("resource_posts")
-      .insert({
-        owner_id: user,
-        kind,
-        title: title.trim(),
-        description: description.trim(),
-        zone: `${city}, ${region}`,
-        starts_at: a.toISOString(),
-        ends_at: b.toISOString(),
-        price: kind === "loan" ? 0 : amount,
-        deposit: kind === "loan" ? 0 : guarantee,
-        unit,
-        photos: paths,
-      });
+    if (kind === "rental" && !photos.length)
+      throw new Error("Añade al menos una foto del objeto.");
+    const paths = await uploadPhotos("recursos", photos);
+    const result = await supabase!.from("resource_posts").insert({
+      owner_id: user,
+      kind,
+      title: title.trim(),
+      description: description.trim(),
+      zone: `${city}, ${region}`,
+      starts_at: a.toISOString(),
+      ends_at: b.toISOString(),
+      price: kind === "loan" ? 0 : amount,
+      deposit: kind === "loan" ? 0 : guarantee,
+      unit,
+      photos: paths,
+    });
     if (result.error) throw result.error;
     T("");
     D("");
@@ -159,12 +159,6 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
         contentContainerClassName="p-5 gap-4 pb-12"
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="text-muted">
-          {kind === "loan"
-            ? "Publica qué necesitas que te presten y para qué fechas. El préstamo es gratuito."
-            : "Publica un objeto disponible para alquilar durante un periodo. El pago y la garantía se coordinan entre las partes."}
-        </Text>
-        {!!user&&<PhotoPicker photos={photos} onChange={setPhotos} onError={X}/>}
         {!!error && (
           <Text accessibilityRole="alert" className="text-brand">
             {error}
@@ -185,7 +179,10 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
             onPress={() => router.push("/(auth)/login")}
           />
         ) : (
-          <View className="rounded-2xl bg-white p-4">
+          <Disclosure
+            title={kind === "loan" ? "Pedir un objeto" : "Ofrecer un alquiler"}
+          >
+            <PhotoPicker photos={photos} onChange={setPhotos} onError={X} />
             <FormField
               label={
                 kind === "loan" ? "¿Qué necesitas?" : "Objeto para alquilar"
@@ -251,7 +248,7 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
               loading={busy}
               onPress={() => void run(publish)}
             />
-          </View>
+          </Disclosure>
         )}
         {query.isLoading && <Text>Cargando publicaciones…</Text>}
         {query.data?.posts.length === 0 && (
@@ -273,7 +270,14 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
         {query.data?.posts.map((p) => (
           <View key={p.id} className="gap-3 rounded-2xl bg-white p-4">
             <Text className="font-display text-xl text-navy">{p.title}</Text>
-            {p.photos?.map(path=><Image key={path} source={{uri:photoUrl(path)}} style={{width:'100%',height:180,borderRadius:12}} contentFit="cover"/>)}
+            {p.photos?.map((path) => (
+              <Image
+                key={path}
+                source={{ uri: photoUrl(path) }}
+                style={{ width: "100%", height: 180, borderRadius: 12 }}
+                contentFit="cover"
+              />
+            ))}
             <Text>{p.description}</Text>
             <Text className="text-muted">
               {p.zone} ·{" "}

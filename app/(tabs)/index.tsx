@@ -1,105 +1,205 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { EmptyState } from "@/components/empty-state";
+import { ListingCard } from "@/components/listing-card";
+import { ScreenHeader } from "@/components/screen-header";
+import { CommunityShortcuts } from "@/components/community-shortcuts";
+import { colors } from "@/constants/theme";
+import { useDeviceLocation } from "@/features/location/location-provider";
+import { useListings } from "@/hooks/use-listings";
+import { useNearbyListings } from "@/hooks/use-nearby-listings";
+import type { ListingType } from "@/types/domain";
 
-import { EmptyState } from '@/components/empty-state';
-import { ListingCard } from '@/components/listing-card';
-import { ScreenHeader } from '@/components/screen-header';
-import { CommunityShortcuts } from '@/components/community-shortcuts';
-import { SearchBar } from '@/components/search-bar';
-import { colors } from '@/constants/theme';
-import { useDeviceLocation } from '@/features/location/location-provider';
-import { useListings } from '@/hooks/use-listings';
-import { useNearbyListings } from '@/hooks/use-nearby-listings';
-import type { ListingType } from '@/types/domain';
-
-const quickLinks: { type?: ListingType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { type: 'product', label: 'Productos', icon: 'bag-handle-outline' },
-  { type: 'service', label: 'Servicios', icon: 'construct-outline' },
-  { type: 'promotion', label: 'Promociones', icon: 'pricetag-outline' },
-  { type: 'need', label: 'Necesidades', icon: 'megaphone-outline' },
-  { label: 'Cerca de ti', icon: 'location-outline' },
-  { label: 'Comunidad', icon: 'people-outline' },
+const filters: { label: string; type?: ListingType }[] = [
+  { label: "Todo" },
+  { label: "Productos", type: "product" },
+  { label: "Servicios", type: "service" },
+  { label: "Promos", type: "promotion" },
+  { label: "Se busca", type: "need" },
 ];
-
 export default function HomeScreen() {
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState<ListingType>();
-  const { listings, isLoading, isError, refresh, cached } = useListings(query, type);
-  const { coordinates, permissionStatus, canAskAgain, isLocating, error: locationError, requestLocation, openLocationSettings } = useDeviceLocation();
+  const [type, T] = useState<ListingType>();
+  const { listings, isLoading, isError, refresh, cached } = useListings(
+    "",
+    type,
+  );
+  const {
+    coordinates,
+    permissionStatus,
+    canAskAgain,
+    isLocating,
+    error: locationError,
+    requestLocation,
+    openLocationSettings,
+  } = useDeviceLocation();
   const nearby = useNearbyListings(coordinates, 15, type);
-  const featured = useMemo(() => listings.slice(0, 4), [listings]);
-
-  useEffect(() => { void requestLocation(); }, [requestLocation]);
-
+  useEffect(() => {
+    void requestLocation();
+  }, [requestLocation]);
+  const ask = () =>
+    void (canAskAgain ? requestLocation() : openLocationSettings());
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-canvas">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScreenHeader />
-      <CommunityShortcuts />
-      {cached&&<Text className="bg-amber-50 px-5 py-2 text-sm text-navy">Sin conexión con el servidor. Mostramos contenido guardado que puede haber cambiado.</Text>}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={() => void refresh()} tintColor={colors.red} />}
-        contentContainerClassName="pb-28"
+        contentContainerClassName="pb-36"
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => void refresh()}
+            tintColor={colors.red}
+          />
+        }
       >
-        <View className="bg-white px-5 pb-5">
-          <Text className="mt-1 font-display text-[28px] leading-8 text-navy">Encuentra. Ofrece.{`\n`}Haz tu trato.</Text>
-          <Text className="mb-3 mt-5 font-medium text-sm text-ink">¿Qué estás buscando?</Text>
-          <SearchBar value={query} onChangeText={setQuery} />
+        {cached && (
+          <Text className="mx-5 mb-2 text-xs text-muted">
+            Sin conexión · contenido guardado
+          </Text>
+        )}
+        <CommunityShortcuts />
+        <View className="flex-row items-center gap-3 px-5 pb-5 pt-1">
+          {[
+            ["calendar-outline", "Agenda", "/agenda"],
+            ["notifications-outline", "Mis alertas", "/alertas"],
+          ].map(([icon, label, path]) => (
+            <Pressable
+              key={path}
+              accessibilityRole="button"
+              onPress={() => router.push(path as "/agenda" | "/alertas")}
+              className="flex-1 flex-row items-center justify-between rounded-2xl bg-white px-4 py-3"
+            >
+              <View className="flex-row items-center gap-2">
+                <Ionicons
+                  name={icon as "calendar-outline"}
+                  size={17}
+                  color={colors.navy}
+                />
+                <Text className="font-medium text-xs text-navy">{label}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={13} color={colors.muted} />
+            </Pressable>
+          ))}
         </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3 px-5 py-5">
-          {quickLinks.map((item) => {
-            const active = item.type === type && item.type !== undefined;
-            return (
-              <Pressable key={item.label} onPress={() => item.type ? setType(active ? undefined : item.type) : router.push(item.label === 'Comunidad' ? '/comunidad' : '/(tabs)/explore')} className="items-center" accessibilityRole="button" accessibilityLabel={item.label}>
-                <View className={`h-14 w-14 items-center justify-center rounded-2xl ${active ? 'bg-brand' : 'bg-white'}`}>
-                  <Ionicons name={item.icon} size={25} color={active ? colors.white : colors.navy} />
-                </View>
-                <Text className={`mt-2 font-medium text-[11px] ${active ? 'text-brand' : 'text-muted'}`}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
+        <View className="mb-3 flex-row items-center justify-between px-5">
+          <Text className="font-medium text-lg tracking-tight text-navy">
+            Lo último
+          </Text>
+          <Pressable
+            accessibilityLabel="Explorar publicaciones"
+            onPress={() => router.push("/(tabs)/explore")}
+            hitSlop={12}
+          >
+            <Ionicons name="arrow-forward" size={21} color={colors.navy} />
+          </Pressable>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-2 px-5 pb-4"
+          style={{ flexGrow: 0 }}
+        >
+          {filters.map((f) => (
+            <Pressable
+              key={f.label}
+              accessibilityRole="button"
+              accessibilityState={{ selected: type === f.type }}
+              onPress={() => T(f.type)}
+              className={`rounded-full px-4 py-2.5 ${type === f.type ? "bg-navy" : "bg-white"}`}
+            >
+              <Text
+                className={`font-medium text-xs ${type === f.type ? "text-white" : "text-muted"}`}
+              >
+                {f.label}
+              </Text>
+            </Pressable>
+          ))}
         </ScrollView>
-
-        {isLoading ? <ActivityIndicator className="my-16" color={colors.red} /> : isError ? (
-          <EmptyState icon="cloud-offline-outline" title="No pudimos cargar las publicaciones" description="Revisa tu conexión y desliza para volver a intentar." />
-        ) : listings.length === 0 ? (
-          <EmptyState title="No encontramos resultados" description="Prueba otra palabra o quita el filtro seleccionado." />
+        {isLoading ? (
+          <ActivityIndicator className="my-12" color={colors.red} />
+        ) : isError ? (
+          <EmptyState
+            icon="cloud-offline-outline"
+            title="No pudimos cargar"
+            description="Desliza para reintentar."
+          />
+        ) : !listings.length ? (
+          <EmptyState
+            title="Sin publicaciones"
+            description="Prueba otra categoría."
+          />
         ) : (
-          <>
-            <View className="mb-3 flex-row items-end justify-between px-5">
-              <View><Text className="font-display text-2xl text-navy">Explora por tu zona</Text><Text className="mt-1 font-sans text-sm text-muted">Opciones destacadas en Bagua</Text></View>
-              <Pressable onPress={() => router.push('/(tabs)/explore')} hitSlop={10}><Text className="font-medium text-sm text-brand">Ver todo</Text></Pressable>
+          <FlatList
+            horizontal
+            data={listings.slice(0, 8)}
+            keyExtractor={(x) => x.id}
+            renderItem={({ item }) => <ListingCard listing={item} horizontal />}
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="px-5"
+          />
+        )}
+        <View className="mb-4 mt-6 flex-row items-center justify-between px-5">
+          <Text className="font-medium text-lg tracking-tight text-navy">
+            Cerca de ti
+          </Text>
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="location-outline" size={13} color={colors.muted} />
+            <Text className="font-sans text-xs text-muted">15 km</Text>
+          </View>
+        </View>
+        {permissionStatus === Location.PermissionStatus.DENIED ? (
+          <Pressable
+            onPress={ask}
+            accessibilityRole="button"
+            className="mx-5 flex-row items-center gap-3 rounded-3xl bg-white p-5"
+          >
+            <Ionicons name="location-outline" size={25} color={colors.navy} />
+            <View className="flex-1">
+              <Text className="font-medium text-sm text-navy">
+                Activar ubicación
+              </Text>
+              <Text className="mt-1 text-xs text-muted">
+                Sin permiso no hay recomendaciones cercanas.
+              </Text>
             </View>
-            <FlatList horizontal data={featured} keyExtractor={(item) => item.id} renderItem={({ item }) => <ListingCard listing={item} horizontal />} showsHorizontalScrollIndicator={false} contentContainerClassName="px-5" />
-            <Text className="mb-3 mt-7 px-5 font-display text-2xl text-navy">Recomendados cerca de ti</Text>
-            {permissionStatus === Location.PermissionStatus.DENIED ? (
-              <View className="mx-5 rounded-3xl bg-white p-6">
-                <View className="h-12 w-12 items-center justify-center rounded-full bg-red-50"><Ionicons name="location-outline" size={25} color={colors.red} /></View>
-                <Text className="mt-4 font-display text-xl text-navy">Activa tu ubicación</Text>
-                <Text className="mt-2 font-sans leading-5 text-muted">No podemos mostrar recomendaciones cercanas porque el permiso de ubicación no está activado.</Text>
-                <Pressable onPress={() => void (canAskAgain ? requestLocation() : openLocationSettings())} className="mt-5 self-start rounded-full bg-navy px-5 py-3">
-                  <Text className="font-medium text-sm text-white">{canAskAgain ? 'Permitir ubicación' : 'Abrir configuración'}</Text>
-                </Pressable>
+            <Ionicons name="arrow-forward" size={18} color={colors.navy} />
+          </Pressable>
+        ) : isLocating || nearby.isLoading ? (
+          <ActivityIndicator className="my-8" color={colors.red} />
+        ) : locationError ? (
+          <Pressable onPress={ask} className="mx-5 rounded-2xl bg-white p-5">
+            <Text className="text-sm text-muted">
+              Ubicación no disponible. Toca para reintentar.
+            </Text>
+          </Pressable>
+        ) : nearby.isError ? (
+          <Text className="px-5 text-sm text-muted">
+            No pudimos cargar la zona. Desliza para reintentar.
+          </Text>
+        ) : nearby.data?.length ? (
+          <View className="flex-row flex-wrap justify-between px-5">
+            {nearby.data.map((item) => (
+              <View key={item.id} style={{ width: "48%" }}>
+                <ListingCard listing={item} />
               </View>
-            ) : isLocating || permissionStatus === Location.PermissionStatus.UNDETERMINED ? (
-              <View className="items-center py-12"><ActivityIndicator color={colors.red} /><Text className="mt-3 font-sans text-sm text-muted">Buscando opciones cerca de ti…</Text></View>
-            ) : locationError ? (
-              <View className="mx-5 rounded-2xl bg-white p-5"><Text className="font-sans text-sm leading-5 text-muted">{locationError}</Text></View>
-            ) : nearby.isLoading ? (
-              <ActivityIndicator className="my-12" color={colors.red} />
-            ) : nearby.data?.length ? (
-              <View className="flex-row flex-wrap gap-x-3 px-5">
-                {nearby.data.map((item) => <View key={item.id} className="w-[48%]"><ListingCard listing={item} /></View>)}
-              </View>
-            ) : (
-              <View className="mx-5 rounded-2xl bg-white p-5"><Text className="font-medium text-navy">No encontramos publicaciones en un radio de 15 km.</Text></View>
-            )}
-          </>
+            ))}
+          </View>
+        ) : (
+          <Text className="px-5 text-sm text-muted">
+            Todavía no hay publicaciones en esta zona.
+          </Text>
         )}
       </ScrollView>
     </SafeAreaView>

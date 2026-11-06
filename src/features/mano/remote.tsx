@@ -1,3 +1,5 @@
+import { FormField } from "@/components/form-field";
+import { PrimaryButton } from "@/components/primary-button";
 import { readImage } from "@/services/images";
 import { goBackOr } from "@/utils/navigation";
 import { ScreenHeader } from "@/components/screen-header";
@@ -9,15 +11,7 @@ import { AreaPicker, NearbyFilter } from "./area-picker";
 import { useCallback, useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import {
-  Alert,
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/features/auth/auth-provider";
 import { supabase } from "@/lib/supabase";
@@ -31,30 +25,8 @@ const card = {
   borderRadius: 16,
   marginVertical: 8,
 } as const;
-const field = {
-  borderColor: "#d1d5db",
-  borderWidth: 1,
-  borderRadius: 10,
-  padding: 10,
-  marginTop: 5,
-  marginBottom: 10,
-} as const;
 function Button({ text, onPress }: { text: string; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        backgroundColor: "#0b2d5d",
-        borderRadius: 10,
-        padding: 12,
-        marginVertical: 4,
-      }}
-    >
-      <Text style={{ color: "white", textAlign: "center", fontWeight: "700" }}>
-        {text}
-      </Text>
-    </Pressable>
-  );
+  return <PrimaryButton label={text} onPress={onPress} />;
 }
 function Field({
   label,
@@ -70,20 +42,13 @@ function Field({
   multiline?: boolean;
 }) {
   return (
-    <View>
-      <Text style={{ fontWeight: "600", color: "#0b2d5d" }}>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        value={value}
-        onChangeText={set}
-        placeholder={placeholder}
-        multiline={multiline}
-        style={[
-          field,
-          multiline ? { minHeight: 90, textAlignVertical: "top" } : {},
-        ]}
-      />
-    </View>
+    <FormField
+      label={label}
+      value={value}
+      onChangeText={set}
+      placeholder={placeholder}
+      multiline={multiline}
+    />
   );
 }
 function Choice<T extends string>({
@@ -419,7 +384,13 @@ export function ManoRemote() {
   }
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f5f7" }}>
-      <ScreenHeader title="Necesito una mano" showBack onBack={()=>screen === "list" ? goBackOr("/(tabs)/publish") : show("list")} />
+      <ScreenHeader
+        title="Necesito una mano"
+        showBack
+        onBack={() =>
+          screen === "list" ? goBackOr("/(tabs)/publish") : show("list")
+        }
+      />
       <ScrollView
         contentContainerStyle={{
           padding: 20,
@@ -429,7 +400,6 @@ export function ManoRemote() {
           paddingBottom: 70,
         }}
       >
-
         {busy && <Text>Procesando…</Text>}
         {!!error && (
           <Text

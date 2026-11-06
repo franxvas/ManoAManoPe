@@ -1,5 +1,6 @@
+import { Disclosure } from "@/components/disclosure";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 import { PrimaryButton } from "@/components/primary-button";
 import { readCache, writeCache } from "./cache";
 export function DraftControls<T>({
@@ -33,8 +34,7 @@ export function DraftControls<T>({
     }
   }
   return (
-    <View className="mb-4 gap-2 rounded-2xl bg-white p-4">
-      <Text className="font-medium text-navy">Borrador sin conexión</Text>
+    <Disclosure title="Borrador">
       <Text className="text-xs text-muted">
         Guarda el texto para continuar después. Tendrás que volver a seleccionar
         las fotos y conectarte para publicar.
@@ -56,6 +56,6 @@ export function DraftControls<T>({
           {notice}
         </Text>
       )}
-    </View>
+    </Disclosure>
   );
 }

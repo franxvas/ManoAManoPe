@@ -10,7 +10,7 @@ module.exports = {
         muted: '#6B7280', line: '#E5E7EB', success: '#1FA66A', rating: '#F4B400'
       },
       fontFamily: {
-        sans: ['Inter_400Regular'], medium: ['Inter_600SemiBold'], display: ['RobotoCondensed_700Bold']
+        sans: ['Inter_400Regular'], medium: ['Inter_600SemiBold'], display: ['Inter_600SemiBold']
       }
     }
   },

@@ -36,13 +36,7 @@ export function PublicReviews({
   };
   return (
     <View className="mt-5 gap-3 rounded-2xl bg-white p-4">
-      <Text className="font-display text-xl text-navy">
-        Reseñas de operaciones completadas
-      </Text>
-      <Text className="text-xs text-muted">
-        Una opinión por persona y operación. Las reseñas publicadas no se
-        editan. No acreditan pagos ni verifican identidades.
-      </Text>
+      <Text className="font-display text-xl text-navy">Reseñas</Text>
       {!isSupabaseConfigured ? (
         <Text className="text-muted">
           No hay reputación real en modo demostración.
@@ -60,9 +54,7 @@ export function PublicReviews({
           />
         </>
       ) : !query.data?.length ? (
-        <Text className="text-muted">
-          Todavía no hay reseñas de operaciones completadas.
-        </Text>
+        <Text className="text-muted">Sin reseñas todavía.</Text>
       ) : (
         <>
           {query.data.map((r) => (
