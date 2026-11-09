@@ -1,38 +1,50 @@
-export interface RecursoAlquiler {
+export interface Recurso {
   id: string;
-  nombre: string;
-  tipo: 'hora' | 'dia';
-  precioUnitario: number;
-  garantia: number;
+  titulo: string;
+  tipo: 'alquiler' | 'prestamo';
+  precio?: string;
+  garantia?: string;
   condiciones: string;
+  foto: string;
+  propietario: string;
 }
 
-export interface ReservaAlquiler {
-  id: string;
-  recursoId: string;
-  fechaInicio: string;
-  fechaFin: string;
-  estado: 'pendiente' | 'aceptada' | 'rechazada' | 'cerrado';
-}
-
-export function validarDisponibilidad(
-  reservasExistentes: ReservaAlquiler[],
-  nuevoRecursoId: string,
-  nuevaInicio: Date,
-  nuevaFin: Date
-): boolean {
-  const reservasDelRecurso = reservasExistentes.filter(
-    (r) => r.recursoId === nuevoRecursoId && r.estado === 'aceptada'
-  );
-
-  for (const reserva of reservasDelRecurso) {
-    const inicioExistente = new Date(reserva.fechaInicio);
-    const finExistente = new Date(reserva.fechaFin);
-
-    if (nuevaInicio < finExistente && nuevaFin > inicioExistente) {
-      return false;
-    }
+let recursosData: Recurso[] = [
+  {
+    id: '1',
+    titulo: 'Moto Lineal 150cc',
+    tipo: 'alquiler',
+    precio: 'S/ 45 por día',
+    garantia: 'S/ 150 de garantía',
+    condiciones: 'Licencia de conducir vigente y DNI obligatorio.',
+    foto: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400',
+    propietario: 'Carlos Mendoza'
+  },
+  {
+    id: '2',
+    titulo: 'Proyector Multimedia HD',
+    tipo: 'alquiler',
+    precio: 'S/ 30 por día',
+    garantia: 'S/ 200 de garantía',
+    condiciones: 'Devolver en su maletín original y sin daños.',
+    foto: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400',
+    propietario: 'Lucía Torres'
   }
+];
 
-  return true;
+export function getAlquileres() {
+  return recursosData.filter(r => r.tipo === 'alquiler');
+}
+
+export function getRecursoById(id: string) {
+  return recursosData.find(r => r.id === id);
+}
+
+export function agregarAlquiler(nuevo: Omit<Recurso, 'id' | 'tipo'>) {
+  const item: Recurso = {
+    ...nuevo,
+    id: Date.now().toString(),
+    tipo: 'alquiler',
+  };
+  recursosData = [item, ...recursosData];
 }
