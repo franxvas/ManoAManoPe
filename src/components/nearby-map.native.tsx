@@ -27,8 +27,8 @@ export function NearbyMap({ listings, region, selectedId, userCoordinates, locat
           <Marker key={listing.id} coordinate={positions.get(listing.id)!} onPress={() => selectListing(listing)}>
             <View className="items-center">
               <View className={`h-12 w-12 overflow-hidden rounded-full border-[3px] bg-white ${selectedId === listing.id ? 'border-brand' : 'border-navy'}`}>
-                {listing.ownerAvatar || listing.images[0] ? (
-                  <Image source={{ uri: listing.ownerAvatar || listing.images[0] }} style={{ width: '100%', height: '100%' }} />
+                {listing.images[0] || listing.ownerAvatar ? (
+                  <Image source={{ uri: listing.images[0] || listing.ownerAvatar }} style={{ width: '100%', height: '100%' }} />
                 ) : (
                   <View className="flex-1 items-center justify-center bg-navy">
                     <Ionicons name={listing.type === 'service' ? 'construct' : listing.type === 'promotion' ? 'pricetag' : 'bag-handle'} size={18} color="white" />

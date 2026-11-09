@@ -12,7 +12,7 @@ import { spreadPositions } from './map-spread';
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
 
-// Burbuja con la foto del vendedor (o de la publicación) y el precio debajo, apuntando a su ubicación.
+// Burbuja con la foto del producto (o del vendedor si no tiene) y el precio debajo, apuntando a su ubicación.
 const markerIcon = (photo: string | undefined, label: string, active: boolean) => {
   const ring = active ? colors.red : colors.navy;
   const image = photo
@@ -83,7 +83,7 @@ export function NearbyMap({ listings, region, selectedId, userCoordinates, locat
           <Marker
             key={listing.id}
             position={[positions.get(listing.id)!.latitude, positions.get(listing.id)!.longitude]}
-            icon={markerIcon(listing.ownerAvatar || listing.images[0], formatMoney(getListingAmount(listing.price, listing.budget)), listing.id === selectedId)}
+            icon={markerIcon(listing.images[0] || listing.ownerAvatar, formatMoney(getListingAmount(listing.price, listing.budget)), listing.id === selectedId)}
             eventHandlers={{ click: () => onSelect(listing) }}
           />
         ))}
