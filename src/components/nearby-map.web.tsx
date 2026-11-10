@@ -7,8 +7,7 @@ import 'leaflet/dist/leaflet.css';
 
 import type { MapRegion, NearbyMapProps } from '@/components/nearby-map.types';
 import { colors } from '@/constants/theme';
-import { formatMoney, getListingAmount } from '@/utils/format';
-import { spreadPositions } from './map-spread';
+import { groupByPlace, placeLabel, spreadPositions } from './map-spread';
 
 const escape = (text: string) => text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
 
@@ -66,7 +65,8 @@ function MapViewport({ region }: { region: MapRegion }) {
 }
 
 export function NearbyMap({ listings, region, selectedId, userCoordinates, locationUnavailable, onRegionChange, onSelect, onRequestLocation }: NearbyMapProps) {
-  const positions = spreadPositions(listings);
+  const places = groupByPlace(listings);
+  const positions = spreadPositions(places);
   const centerOnUser = () => {
     if (!userCoordinates) return onRequestLocation();
     onRegionChange({ ...region, ...userCoordinates });
@@ -79,14 +79,17 @@ export function NearbyMap({ listings, region, selectedId, userCoordinates, locat
         <MapEvents onRegionChange={onRegionChange} />
         <MapViewport region={region} />
         {userCoordinates && <Marker position={[userCoordinates.latitude, userCoordinates.longitude]} icon={userIcon} />}
-        {listings.map((listing) => (
-          <Marker
-            key={listing.id}
-            position={[positions.get(listing.id)!.latitude, positions.get(listing.id)!.longitude]}
-            icon={markerIcon(listing.images[0] || listing.ownerAvatar, formatMoney(getListingAmount(listing.price, listing.budget)), listing.id === selectedId)}
-            eventHandlers={{ click: () => onSelect(listing) }}
-          />
-        ))}
+        {places.map((place) => {
+          const first = place.listings[0]!;
+          return (
+            <Marker
+              key={place.key}
+              position={[positions.get(place.key)!.latitude, positions.get(place.key)!.longitude]}
+              icon={markerIcon(first.images[0] || first.ownerAvatar, placeLabel(place.listings), place.listings.some((item) => item.id === selectedId))}
+              eventHandlers={{ click: () => onSelect(first) }}
+            />
+          );
+        })}
       </MapContainer>
       {locationUnavailable && (
         <Pressable onPress={onRequestLocation} className="absolute left-5 right-20 top-4 flex-row items-center rounded-2xl bg-white p-3 shadow-md">
