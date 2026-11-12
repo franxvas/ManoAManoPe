@@ -10,7 +10,7 @@ import { Image } from "expo-image";
 import { cssInterop } from "nativewind";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -33,7 +33,13 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
-  if (!ready) return null;
+  // Mientras cargan las fuentes se muestra el logo (en vez de una pantalla en blanco).
+  if (!ready)
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF" }}>
+        <Image source={require("../assets/logo-mano-a-mano.png")} style={{ width: 200, height: 200 }} contentFit="contain" />
+      </View>
+    );
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#F4F5F7" }}>
