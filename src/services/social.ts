@@ -46,7 +46,7 @@ export async function fetchRemoteConversations(): Promise<RemoteConversation[]> 
   return rows.map((row) => {
     const counterpart = row.buyer_id === auth.user!.id ? row.seller : row.buyer;
     return {
-      id: row.id, listingId: row.listing_id, participantName: counterpart.display_name, participantAvatar: counterpart.avatar_url ?? '',
+      id: row.id, listingId: row.listing_id, participantId: row.buyer_id === auth.user!.id ? row.seller_id : row.buyer_id, participantName: counterpart.display_name, participantAvatar: counterpart.avatar_url ?? '',
       lastMessage: messageByConversation.get(row.id) ?? row.listing.title, lastMessageAt: row.last_message_at, unreadCount: unreadByConversation.get(row.id) ?? 0,
       status: normalizeConversationStatus(row.status), buyerId: row.buyer_id, sellerId: row.seller_id,
     };
