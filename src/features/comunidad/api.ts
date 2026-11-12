@@ -20,7 +20,9 @@ export async function currentUserId() {
   return data.user.id;
 }
 
+// Acepta rutas de Storage o URLs completas (los datos de ejemplo usan fotos externas).
 export function photoUrl(path: string) {
+  if (/^https?:\/\//.test(path)) return path;
   return db().storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 

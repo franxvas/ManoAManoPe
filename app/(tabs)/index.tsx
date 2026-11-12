@@ -17,6 +17,8 @@ import { useNearbyListings } from '@/hooks/use-nearby-listings';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type { Listing, ListingType } from '@/types/domain';
 import { getAlquileres, Recurso } from '@/features/recursos/recursosStore';
+import { useAuth } from '@/features/auth/auth-provider';
+import { coincide, interesesDe } from '@/features/preferencias/intereses';
 
 const categories: { type?: ListingType | 'alquiler'; label: string }[] = [
   { label: 'Todo' },
@@ -43,7 +45,12 @@ export default function HomeScreen() {
   const nearby = useNearbyListings(coordinates, 15, type === 'alquiler' ? undefined : type);
   const browsing = !query.trim() && !type;
   
+  const { session } = useAuth();
+  const misIntereses = interesesDe(session);
   const promotions = listings.filter((item) => item.type === 'promotion' && (!item.validUntil || item.validUntil >= new Date().toLocaleDateString('sv-SE')));
+  // Con intereses guardados, se muestran las promociones que coinciden; si ninguna coincide, todas.
+  const paraTi = promotions.filter((item) => coincide(item, misIntereses));
+  const promosInicio = paraTi.length ? paraTi : promotions;
   const discoveries = listings.filter((item) => item.type === 'product');
   const needs = listings.filter((item) => item.type === 'need');
   const services = listings.filter((item) => item.type === 'service');
@@ -137,7 +144,7 @@ export default function HomeScreen() {
               <EmptyState title="No encontramos resultados" description="Prueba otra palabra o selecciona Todo." />
             ) : (!browsing || discoveries.length > 0) && <ListingSection title={browsing ? 'Descubre lo que hay' : `${listings.length} resultados`} rows={browsing ? discoveries : listings} limit={browsing ? 8 : listings.length} showMap />}
 
-            {browsing && promotions.length > 0 && <ListingSection title="Promociones" rows={promotions} accent="promotion" />}
+            {browsing && promosInicio.length > 0 && <ListingSection title={paraTi.length ? 'Promociones para ti' : 'Promociones'} rows={promosInicio} accent="promotion" />}
             {browsing && needs.length > 0 && <ListingSection title="Se busca cerca de ti" rows={needs} accent="need" />}
             {browsing && services.length > 0 && <ListingSection title="Servicios para ti" rows={services} accent="service" />}
           </>

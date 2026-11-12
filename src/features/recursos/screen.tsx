@@ -253,13 +253,14 @@ export function ResourceScreen({ kind }: { kind: "loan" | "rental" }) {
         {query.isLoading && <Text>Cargando publicaciones…</Text>}
         {query.data?.posts.length === 0 && <Text className="text-muted">{postId ? 'Este contenido ya no está disponible.' : 'Todavía no hay publicaciones.'}</Text>}
         {!!postId && <PrimaryButton variant="outline" label={kind === 'loan' ? 'Ver todos los préstamos' : 'Ver todos los alquileres'} onPress={() => router.replace(kind === 'loan' ? '/prestamos' : '/alquileres')} />}
-        {!!user && (
+        {!!user && (query.data?.posts.length ?? 0) > 0 && (
           <FormField
             label={
               kind === "loan"
                 ? "Mensaje para prestar el objeto"
                 : "Mensaje para solicitar el alquiler"
             }
+            placeholder={kind === "loan" ? "Escribe aquí y luego toca «Puedo prestártelo» en la publicación" : "Escribe aquí y luego toca «Solicitar alquiler» en la publicación"}
             value={message}
             onChangeText={M}
             multiline

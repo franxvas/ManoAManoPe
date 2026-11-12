@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -37,6 +37,13 @@ export default function ReviewScreen() {
       ),
     enabled: isSupabaseConfigured && Boolean(conversationId),
   });
+  const goHome = () => router.replace("/(tabs)");
+  // Recién enviada la reseña: se muestra el agradecimiento y luego vuelve al inicio solo.
+  useEffect(() => {
+    if (!done) return;
+    const timer = setTimeout(() => router.replace("/(tabs)"), 2500);
+    return () => clearTimeout(timer);
+  }, [done]);
   async function submit() {
     if (lock.current) return;
     setError("");
@@ -101,10 +108,18 @@ export default function ReviewScreen() {
               />
             </>
           ) : done || context.data?.reviewed ? (
-            <Text className="text-success">
-              Tu reseña ya fue registrada. Las reseñas no se editan ni se
-              duplican.
-            </Text>
+            <View className="items-center gap-3 rounded-2xl bg-white p-6">
+              <Ionicons name="checkmark-circle" size={56} color={colors.success} />
+              <Text className="font-display text-xl text-navy">¡Gracias por tu reseña!</Text>
+              <Text className="text-center text-sm text-muted">
+                {done
+                  ? "Te llevamos al inicio en unos segundos…"
+                  : "Tu reseña ya fue registrada. Las reseñas no se editan ni se duplican."}
+              </Text>
+              <View className="w-full">
+                <PrimaryButton label="Ir al inicio" onPress={goHome} />
+              </View>
+            </View>
           ) : !context.data?.completed ? (
             <Text className="text-muted">
               Primero debe completarse la operación. En servicios, ambas partes

@@ -60,9 +60,8 @@ export default function ExploreScreen() {
     requestLocation,
     openLocationSettings,
   } = useDeviceLocation();
-  const searchCenter = coordinates
-    ? { latitude: region.latitude, longitude: region.longitude }
-    : null;
+  // Sin ubicación se busca alrededor del centro del mapa, que empieza en Bagua.
+  const searchCenter = { latitude: region.latitude, longitude: region.longitude };
   const nearby = useNearbyListings(searchCenter, radiusKm, type, categoryId);
   const remoteCategories = useQuery({
     queryKey: ["categories"],
@@ -80,7 +79,7 @@ export default function ExploreScreen() {
       (!maxPrice ||
         (getListingAmount(item.price, item.budget) ?? 0) <= maxPrice) &&
       (!normalizedQuery ||
-        `${item.title} ${item.description} ${item.ownerName}`
+        `${item.title} ${item.description} ${item.ownerName} ${item.ownerProfession ?? ""}`
           .toLocaleLowerCase("es-PE")
           .includes(normalizedQuery)),
   );
@@ -94,6 +93,10 @@ export default function ExploreScreen() {
     [listings],
   );
   const selectListing = (listing: Listing) => setSelected(listing);
+  // Al tocar una burbuja se muestran todos los productos de ese negocio que coinciden con la búsqueda.
+  const placeListings = selected
+    ? listings.filter((item) => item.ownerId === selected.ownerId && item.latitude === selected.latitude && item.longitude === selected.longitude)
+    : [];
 
   useEffect(() => {
     void requestLocation();
@@ -265,7 +268,11 @@ export default function ExploreScreen() {
           {selected ? (
             <View className="px-5">
               <Pressable accessibilityRole="button" onPress={() => setSelected(undefined)} className="mb-2 min-h-11 justify-center self-start rounded-full bg-white px-4"><Text className="font-medium text-xs text-navy">Ver todas</Text></Pressable>
-              <ListingCard listing={selected} mapPreview />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {placeListings.map((item) => (
+                  <ListingCard key={item.id} listing={item} mapPreview />
+                ))}
+              </ScrollView>
             </View>
           ) : (
             <ScrollView

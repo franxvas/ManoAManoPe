@@ -88,6 +88,7 @@ export interface Offer {
 export interface Conversation {
   id: string;
   listingId: string;
+  participantId?: string;
   participantName: string;
   participantAvatar: string;
   lastMessage: string;

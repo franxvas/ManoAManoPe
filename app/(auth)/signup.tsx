@@ -47,7 +47,7 @@ export default function SignupScreen() {
     const result = await signUp(name.trim(), email.trim(), password);
     if (result.error) return setError("root", { message: result.error });
     if (result.needsConfirmation) return setConfirmationSent(true);
-    router.replace("/(tabs)");
+    router.replace("/(auth)/preferencias");
   });
 
   return (

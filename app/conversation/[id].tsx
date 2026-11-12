@@ -70,8 +70,16 @@ export default function ConversationScreen() {
       <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
         <View className="flex-row items-center border-b border-line bg-white px-4 py-3">
           <Pressable onPress={() => goBackOr('/(tabs)/messages')} className="mr-3 h-10 w-10 items-center justify-center"><Ionicons name="arrow-back" size={24} color={colors.navy} /></Pressable>
-          <Avatar uri={conversation.participantAvatar} name={conversation.participantName} size={43} />
-          <View className="ml-3 flex-1"><Text className="font-display text-lg text-navy">{conversation.participantName}</Text><Text className="font-sans text-[11px] text-success">Activo recientemente</Text></View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Ver perfil de ${conversation.participantName}`}
+            disabled={!conversation.participantId}
+            onPress={() => conversation.participantId && router.push({ pathname: '/profile/[id]', params: { id: conversation.participantId } })}
+            className="flex-1 flex-row items-center"
+          >
+            <Avatar uri={conversation.participantAvatar} name={conversation.participantName} size={43} />
+            <View className="ml-3 flex-1"><Text className="font-display text-lg text-navy">{conversation.participantName}</Text><Text className="font-sans text-[11px] text-success">{conversation.participantId ? 'Toca para ver su perfil' : 'Activo recientemente'}</Text></View>
+          </Pressable>
           <Pressable onPress={() => Alert.alert('Conversación', undefined, [{ text: 'Ver publicación', onPress: () => router.push({ pathname: '/listing/[id]', params: { id: listing.id } }) }, { text: 'Cancelar', style: 'cancel' }])} className="h-10 w-10 items-center justify-center" accessibilityLabel="Opciones de conversación"><Ionicons name="ellipsis-vertical" size={22} color={colors.navy} /></Pressable>
         </View>
         <Pressable onPress={() => router.push({ pathname: '/listing/[id]', params: { id: listing.id } })} className="mx-4 mt-3 flex-row items-center rounded-2xl border border-line bg-white p-3">
@@ -79,6 +87,13 @@ export default function ConversationScreen() {
           <View className="ml-3 flex-1"><Text className="font-medium text-sm text-ink" numberOfLines={1}>{listing.title}</Text><Text className="mt-1 font-display text-base text-brand">{formatMoney(getListingAmount(listing.price, listing.budget))}</Text></View>
           <Ionicons name="chevron-forward" size={19} color={colors.muted} />
         </Pressable>
+        {isSupabaseConfigured && conversation.status === 'accepted' && listing.type !== 'need' && (
+          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/confianza/confirmar', params: { conversationId: id } })} className="mx-4 mt-2 flex-row items-center rounded-2xl bg-success p-3">
+            <Ionicons name="shield-checkmark-outline" size={22} color="white" />
+            <View className="ml-3 flex-1"><Text className="font-medium text-sm text-white">{listing.type === 'service' ? 'Confirmar servicio' : 'Confirmar entrega'} y calificar</Text><Text className="font-sans text-[11px] text-white">Con un código de 6 dígitos, luego dejas tu reseña</Text></View>
+            <Ionicons name="chevron-forward" size={19} color="white" />
+          </Pressable>
+        )}
         <ScrollView className="flex-1" contentContainerClassName="gap-3 px-4 py-5" keyboardShouldPersistTaps="handled">
           {messages.map((message) => {
             const mine = message.senderId === (session?.user.id ?? DEMO_USER_ID);

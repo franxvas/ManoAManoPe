@@ -46,7 +46,7 @@ export async function fetchRemoteConversations(): Promise<RemoteConversation[]> 
   return rows.map((row) => {
     const counterpart = row.buyer_id === auth.user!.id ? row.seller : row.buyer;
     return {
-      id: row.id, listingId: row.listing_id, participantName: counterpart.display_name, participantAvatar: counterpart.avatar_url ?? '',
+      id: row.id, listingId: row.listing_id, participantId: row.buyer_id === auth.user!.id ? row.seller_id : row.buyer_id, participantName: counterpart.display_name, participantAvatar: counterpart.avatar_url ?? '',
       lastMessage: messageByConversation.get(row.id) ?? row.listing.title, lastMessageAt: row.last_message_at, unreadCount: unreadByConversation.get(row.id) ?? 0,
       status: normalizeConversationStatus(row.status), buyerId: row.buyer_id, sellerId: row.seller_id,
     };
@@ -109,14 +109,15 @@ export async function submitRemoteReview(conversationId: string, rating: number,
 }
 
 export function subscribeToConversation(conversationId: string, onChange: () => void): RealtimeChannel {
-  return requireClient().channel(`conversation:${conversationId}`)
+  // Nombre único: si la pantalla se monta dos veces, Supabase no reutiliza un canal ya suscrito.
+  return requireClient().channel(`conversation:${conversationId}:${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, onChange)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'offers', filter: `conversation_id=eq.${conversationId}` }, onChange)
     .subscribe();
 }
 
 export function subscribeToConversationList(onChange: () => void): RealtimeChannel {
-  return requireClient().channel('conversation-list')
+  return requireClient().channel(`conversation-list:${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, onChange)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, onChange)
     .subscribe();

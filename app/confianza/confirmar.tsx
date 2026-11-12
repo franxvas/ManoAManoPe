@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, router } from "expo-router";
 import { useRef, useState } from "react";
@@ -33,6 +34,17 @@ export default function ConfirmationScreen() {
     enabled: isSupabaseConfigured && Boolean(conversationId),
     refetchInterval: 15000,
   });
+  const product = state.data?.kind === "product";
+  const what = product ? "el producto" : "el servicio";
+  const step = !state.data || state.data.status === "not_requested" ? 1 : state.data.status === "confirmed" ? 3 : 2;
+  const hint =
+    state.data?.role === "worker"
+      ? step === 1
+        ? `Cuando entregues ${what}, pide la confirmación al cliente.`
+        : "Pídele al cliente el código de 6 dígitos que le aparece en su pantalla y escríbelo aquí."
+      : step === 1
+        ? `Cuando ${product ? "te entreguen el producto" : "terminen el servicio"}, el vendedor te pedirá confirmar. Aquí aparecerá el botón para generar tu código.`
+        : `Genera el código solo cuando ya tengas ${what} y muéstraselo en persona. El código confirma la entrega, nunca un pago.`;
   async function run(action: string) {
     if (lock.current) return;
     lock.current = true;
@@ -83,7 +95,7 @@ export default function ConfirmationScreen() {
   }
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
-      <ScreenHeader title="Confirmar servicio" showBack />
+      <ScreenHeader title={product ? "Confirmar entrega" : "Confirmar servicio"} showBack />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -92,11 +104,13 @@ export default function ConfirmationScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="p-5 pb-10 gap-4"
         >
-          <Text className="font-sans text-sm text-muted">
-            El cliente genera el código después de recibir el servicio y se lo
-            muestra al trabajador. No lo envíes antes. El código confirma la
-            finalización, nunca un pago.
-          </Text>
+          {state.data && <Steps current={step} product={product} />}
+          {state.data && step < 3 && (
+            <View className="flex-row gap-3 rounded-2xl bg-red-50 p-4">
+              <Ionicons name="information-circle-outline" size={22} color={colors.red} />
+              <Text className="flex-1 font-sans text-sm leading-5 text-ink">{hint}</Text>
+            </View>
+          )}
           {!isSupabaseConfigured ? (
             <Text className="text-ink">
               Conecta Supabase para utilizar confirmaciones reales. No hay
@@ -119,18 +133,18 @@ export default function ConfirmationScreen() {
               <View className="gap-4 rounded-2xl bg-white p-5">
                 <Text className="font-medium text-navy">
                   {state.data.status === "confirmed"
-                    ? "Servicio confirmado"
+                    ? product ? "Entrega confirmada" : "Servicio confirmado"
                     : state.data.status === "not_requested"
-                      ? "Pendiente de solicitud"
-                      : "Confirmación pendiente"}
+                      ? "Esperando la solicitud de confirmación"
+                      : state.data.role === "worker" ? "Esperando el código del cliente" : "Genera tu código"}
                 </Text>
                 {state.data.status === "confirmed" ? (
                   <>
                     <Text className="text-success">
-                      La operación se completó correctamente.
+                      ¡Listo! Ahora califica {product ? "el producto" : "el servicio"} con estrellas y deja tu reseña.
                     </Text>
                     <PrimaryButton
-                      label="Escribir reseña"
+                      label="Calificar y reseñar"
                       onPress={() =>
                         router.push({
                           pathname: "/review/[conversationId]",
@@ -143,7 +157,7 @@ export default function ConfirmationScreen() {
                   <>
                     {state.data.status === "not_requested" ? (
                       <PrimaryButton
-                        label="Solicitar confirmación al cliente"
+                        label={product ? "Ya entregué, pedir confirmación" : "Terminé, pedir confirmación"}
                         loading={busy}
                         onPress={() => void run("request")}
                       />
@@ -155,7 +169,9 @@ export default function ConfirmationScreen() {
                           onChangeText={(v) => setCode(v.replace(/\D/g, ""))}
                           keyboardType="number-pad"
                           maxLength={6}
-                          className="h-14 rounded-xl border border-line px-4 text-xl text-ink"
+                          placeholder="000000"
+                          placeholderTextColor={colors.muted}
+                          className="h-16 rounded-xl border border-line px-4 text-center font-display text-3xl tracking-widest text-ink"
                         />
                         <PrimaryButton
                           label="Confirmar con código"
@@ -170,8 +186,8 @@ export default function ConfirmationScreen() {
                   <>
                     {state.data.status === "not_requested" ? (
                       <Text className="text-muted">
-                        El trabajador todavía no solicitó confirmar la
-                        finalización.
+                        Todavía no te pidieron confirmar. Vuelve aquí cuando
+                        tengas {what}.
                       </Text>
                     ) : (
                       <>
@@ -179,19 +195,22 @@ export default function ConfirmationScreen() {
                           label={
                             issued
                               ? "Generar otro código"
-                              : "Recibí el servicio y generar código"
+                              : product ? "Recibí el producto, generar código" : "Recibí el servicio, generar código"
                           }
                           loading={busy}
                           onPress={() => void run("issue")}
                         />
                         {issued && (
                           <>
-                            <Text
-                              selectable
-                              className="text-center font-display text-3xl text-brand"
-                            >
-                              {issued.code}
-                            </Text>
+                            <View className="items-center rounded-2xl border-2 border-dashed border-brand bg-red-50 py-5">
+                              <Text className="font-sans text-xs text-muted">Muestra este código al vendedor</Text>
+                              <Text
+                                selectable
+                                className="mt-1 font-display text-5xl tracking-widest text-brand"
+                              >
+                                {issued.code}
+                              </Text>
+                            </View>
                             <Text className="text-muted">
                               Vence a las{" "}
                               {new Date(issued.expires_at).toLocaleTimeString(
@@ -218,5 +237,28 @@ export default function ConfirmationScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+// Los tres pasos: pedir confirmación, código y reseña.
+function Steps({ current, product }: { current: number; product: boolean }) {
+  const steps = [product ? "Entrega" : "Servicio", "Código", "Reseña"];
+  return (
+    <View className="flex-row items-center rounded-2xl bg-white p-4">
+      {steps.map((label, i) => {
+        const n = i + 1, done = n < current, on = n === current;
+        return (
+          <View key={label} className="flex-1 flex-row items-center">
+            <View className="items-center">
+              <View className={`h-9 w-9 items-center justify-center rounded-full ${done ? "bg-success" : on ? "bg-brand" : "bg-line"}`}>
+                {done ? <Ionicons name="checkmark" size={18} color="white" /> : <Text className={`font-medium ${on ? "text-white" : "text-muted"}`}>{n}</Text>}
+              </View>
+              <Text className={`mt-1 text-xs ${on ? "font-medium text-ink" : "text-muted"}`}>{label}</Text>
+            </View>
+            {i < steps.length - 1 && <View className={`mx-2 mb-4 h-0.5 flex-1 ${done ? "bg-success" : "bg-line"}`} />}
+          </View>
+        );
+      })}
+    </View>
   );
 }
