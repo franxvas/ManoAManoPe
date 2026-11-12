@@ -90,6 +90,17 @@ export default function HomeScreen() {
           })}
         </ScrollView>
 
+        {browsing && (
+          <Pressable accessibilityRole="button" onPress={() => router.push('/comunidad')} className="mx-4 mb-4 flex-row items-center gap-3 rounded-2xl border border-line bg-white p-4">
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-red-50"><Ionicons name="people-outline" size={22} color={colors.red} /></View>
+            <View className="flex-1">
+              <Text className="font-display text-base text-ink">Comunidad</Text>
+              <Text className="font-sans text-xs text-muted">Donaciones, adopciones, eventos y talleres</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+          </Pressable>
+        )}
+
         {/* VISTA CUANDO SE SELECCIONA ALQUILERES */}
         {type === 'alquiler' ? (
           <View className="px-4 mb-5">
