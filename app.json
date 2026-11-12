@@ -24,7 +24,7 @@
         "CAMERA"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
+        "backgroundColor": "#D7192D",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -39,7 +39,7 @@
       "expo-image",
       "expo-secure-store",
       "expo-font",
-      ["expo-splash-screen", { "image": "./assets/splash-icon.png", "imageWidth": 180, "resizeMode": "contain", "backgroundColor": "#FFFFFF" }],
+      ["expo-splash-screen", { "image": "./assets/splash-icon.png", "imageWidth": 280, "resizeMode": "contain", "backgroundColor": "#FFFFFF" }],
       "expo-notifications",
       [
         "expo-location",
