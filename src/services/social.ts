@@ -109,14 +109,15 @@ export async function submitRemoteReview(conversationId: string, rating: number,
 }
 
 export function subscribeToConversation(conversationId: string, onChange: () => void): RealtimeChannel {
-  return requireClient().channel(`conversation:${conversationId}`)
+  // Nombre único: si la pantalla se monta dos veces, Supabase no reutiliza un canal ya suscrito.
+  return requireClient().channel(`conversation:${conversationId}:${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, onChange)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'offers', filter: `conversation_id=eq.${conversationId}` }, onChange)
     .subscribe();
 }
 
 export function subscribeToConversationList(onChange: () => void): RealtimeChannel {
-  return requireClient().channel('conversation-list')
+  return requireClient().channel(`conversation-list:${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, onChange)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, onChange)
     .subscribe();
