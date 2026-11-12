@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
 
 const logo = require('../../assets/logo-mano-a-mano.png');
-const MIN_VISIBLE_MS = 2500;
+const MIN_VISIBLE_MS = 1000;
 const appStartedAt = Date.now();
 
-// Capa con el logo animado. La app ya carga por debajo; cuando está lista y pasaron 2,5 s, se desvanece.
+// Capa con el logo animado. La app ya carga por debajo; cuando está lista y pasó 1 s, se desvanece.
 export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: () => void }) {
   const [scale] = useState(() => new Animated.Value(0.6));
   const [shake] = useState(() => new Animated.Value(0));
