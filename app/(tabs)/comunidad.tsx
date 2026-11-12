@@ -106,7 +106,7 @@ export default function CommunityScreen() {
     <SafeAreaView edges={["top"]} className="flex-1 bg-canvas">
       <ScreenHeader title="Comunidad" />
       <ScrollView
-        contentContainerClassName="p-5 pb-12"
+        contentContainerClassName="p-5 pb-36"
         showsVerticalScrollIndicator={false}
       >
         <View className="flex-row flex-wrap justify-between gap-y-3">
