@@ -5,21 +5,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/features/auth/auth-provider';
 
-// Misma imagen y tamaño que la pantalla de arranque (app.json), para que el paso sea invisible.
-const logo = require('../assets/splash-icon.png');
+// Mismo logo y tamaño que la pantalla de arranque (app.json), para que el paso sea invisible.
+const logo = require('../assets/logo-mano-a-mano.png');
+const SPLASH_MS = 2500;
+const appStartedAt = Date.now();
 
 export default function SplashRoute() {
   const { loading, isAuthenticated, isGuest } = useAuth();
 
   useEffect(() => {
     if (loading) return;
-    const timer = setTimeout(() => router.replace(isAuthenticated || isGuest ? '/(tabs)' : '/(auth)/welcome'), 600);
+    // El logo se ve 2,5 s en total, aunque la sesión cargue antes.
+    const wait = Math.max(SPLASH_MS - (Date.now() - appStartedAt), 0);
+    const timer = setTimeout(() => router.replace(isAuthenticated || isGuest ? '/(tabs)' : '/(auth)/welcome'), wait);
     return () => clearTimeout(timer);
   }, [isAuthenticated, isGuest, loading]);
 
   return (
     <SafeAreaView className="flex-1 items-center justify-center bg-white">
-      <Image source={logo} style={{ width: 280, height: 84 }} contentFit="contain" accessibilityLabel="mano a mano punto pe" />
+      <Image source={logo} style={{ width: 200, height: 200 }} contentFit="contain" accessibilityLabel="mano a mano punto pe" />
     </SafeAreaView>
   );
 }
