@@ -13,8 +13,10 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: "Inicio" }} />
       <Tabs.Screen name="explore" options={{ title: "Explorar" }} />
       <Tabs.Screen name="publish" options={{ title: "Publicar" }} />
-      <Tabs.Screen name="messages" options={{ title: "Mensajes" }} />
+      <Tabs.Screen name="comunidad" options={{ title: "Comunidad" }} />
       <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
+      {/* Mensajes se abre desde el ícono de chat del encabezado */}
+      <Tabs.Screen name="messages" options={{ title: "Mensajes" }} />
     </Tabs>
   );
 }

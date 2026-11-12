@@ -13,6 +13,8 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/theme";
 
+// Pestañas que existen pero no se muestran en el menú.
+const hidden = new Set(["messages"]);
 const icons: Record<
   string,
   [keyof typeof Ionicons.glyphMap, keyof typeof Ionicons.glyphMap]
@@ -20,7 +22,7 @@ const icons: Record<
   index: ["home-outline", "home"],
   explore: ["compass-outline", "compass"],
   publish: ["add", "add"],
-  messages: ["chatbubbles-outline", "chatbubbles"],
+  comunidad: ["people-outline", "people"],
   profile: ["person-outline", "person"],
 };
 type DockProps = Parameters<
@@ -52,6 +54,7 @@ export function FloatingDock({ state, descriptors, navigation }: DockProps) {
           />
           <View style={styles.row}>
             {state.routes.map((route, index) => {
+              if (hidden.has(route.name)) return null;
               const active = state.index === index,
                 options = descriptors[route.key]?.options;
               const names = icons[route.name] ?? icons.index!;

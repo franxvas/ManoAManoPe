@@ -62,6 +62,14 @@ export function ScreenHeader({
         )}
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel="Mensajes"
+          onPress={() => router.push("/(tabs)/messages")}
+          className="h-11 w-11 items-center justify-center rounded-full"
+        >
+          <Ionicons name="chatbubbles-outline" size={23} color={colors.navy} />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel={
             unread ? `Notificaciones, ${unread} sin leer` : "Notificaciones"
           }
