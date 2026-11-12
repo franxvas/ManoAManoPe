@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 export interface ConfirmationState {
   role: "client" | "worker";
+  kind?: "service" | "product";
   deal_id: string;
   deal_status: string;
   status: string;

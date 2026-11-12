@@ -79,6 +79,13 @@ export default function ConversationScreen() {
           <View className="ml-3 flex-1"><Text className="font-medium text-sm text-ink" numberOfLines={1}>{listing.title}</Text><Text className="mt-1 font-display text-base text-brand">{formatMoney(getListingAmount(listing.price, listing.budget))}</Text></View>
           <Ionicons name="chevron-forward" size={19} color={colors.muted} />
         </Pressable>
+        {isSupabaseConfigured && conversation.status === 'accepted' && listing.type !== 'need' && (
+          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/confianza/confirmar', params: { conversationId: id } })} className="mx-4 mt-2 flex-row items-center rounded-2xl bg-success p-3">
+            <Ionicons name="shield-checkmark-outline" size={22} color="white" />
+            <View className="ml-3 flex-1"><Text className="font-medium text-sm text-white">{listing.type === 'service' ? 'Confirmar servicio' : 'Confirmar entrega'} y calificar</Text><Text className="font-sans text-[11px] text-white">Con un código de 6 dígitos, luego dejas tu reseña</Text></View>
+            <Ionicons name="chevron-forward" size={19} color="white" />
+          </Pressable>
+        )}
         <ScrollView className="flex-1" contentContainerClassName="gap-3 px-4 py-5" keyboardShouldPersistTaps="handled">
           {messages.map((message) => {
             const mine = message.senderId === (session?.user.id ?? DEMO_USER_ID);
