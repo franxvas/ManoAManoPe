@@ -104,4 +104,6 @@ export interface AppNotification {
   body: string;
   read: boolean;
   createdAt: string;
+  /** A qué apunta: conversation_id, deal_id, donation_id, adoption_id o review_id. */
+  data?: Record<string, string>;
 }
