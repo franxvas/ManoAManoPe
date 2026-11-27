@@ -198,7 +198,7 @@ export default function ProfileScreen() {
         </View>
 
         <View className="px-5 py-3">
-          <TrustSummary ownerId={profile.id} />
+          <TrustSummary ownerId={profile.id} own />
           <PrimaryButton
             label="Portafolio"
             onPress={() => router.push("/portafolio")}

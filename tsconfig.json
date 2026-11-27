@@ -8,5 +8,6 @@
     "paths": { "@/*": ["src/*"] },
     "types": ["nativewind/types", "jest"]
   },
+  "exclude": ["node_modules", "supabase/functions"],
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]
 }
