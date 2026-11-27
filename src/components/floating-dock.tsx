@@ -42,8 +42,7 @@ export function FloatingDock({ state, descriptors, navigation }: DockProps) {
   if (keyboard) return null;
   return (
     <View
-      pointerEvents="box-none"
-      style={[styles.position, { bottom: Math.max(insets.bottom, 12) + 8 }]}
+      style={[styles.position, { bottom: Math.max(insets.bottom, 12) + 8, pointerEvents: "box-none" }]}
     >
       <View style={styles.shadow}>
         <View style={styles.shell}>

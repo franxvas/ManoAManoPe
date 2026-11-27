@@ -38,14 +38,15 @@ export default function NuevoAlquilerScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1], // Formato cuadrado estricto
       quality: 0.8,
     });
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setFotoUri(result.assets[0].uri);
+    const foto = result.assets?.[0];
+    if (!result.canceled && foto) {
+      setFotoUri(foto.uri);
     }
   };
 
@@ -58,14 +59,15 @@ export default function NuevoAlquilerScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1], // Formato cuadrado estricto sin exigir recorte forzoso
       quality: 0.8,
     });
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setFotoUri(result.assets[0].uri);
+    const foto = result.assets?.[0];
+    if (!result.canceled && foto) {
+      setFotoUri(foto.uri);
     }
   };
 

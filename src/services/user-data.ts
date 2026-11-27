@@ -18,9 +18,9 @@ export async function toggleRemoteFavorite(listingId: string, currentlyFavorite:
 
 export async function fetchNotifications(): Promise<AppNotification[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase.from('notifications').select('id,type,title,body,read_at,created_at').order('created_at', { ascending: false }).limit(50);
+  const { data, error } = await supabase.from('notifications').select('id,type,title,body,data,read_at,created_at').order('created_at', { ascending: false }).limit(50);
   if (error) throw error;
-  return (data ?? []).map((row) => ({ id: String(row.id), type: normalizeNotificationType(String(row.type)), title: String(row.title), body: String(row.body), read: Boolean(row.read_at), createdAt: String(row.created_at) }));
+  return (data ?? []).map((row) => ({ id: String(row.id), type: normalizeNotificationType(String(row.type)), title: String(row.title), body: String(row.body), read: Boolean(row.read_at), createdAt: String(row.created_at), data: (row.data ?? {}) as Record<string, string> }));
 }
 
 export async function markRemoteNotificationRead(notificationId: string) {
@@ -51,3 +51,16 @@ const normalizeNotificationType = (value: string): AppNotification['type'] => {
   if (value === 'message' || value === 'offer' || value === 'offer_accepted' || value === 'offer_rejected' || value === 'counteroffer' || value === 'review' || value === 'listing') return value;
   return 'listing';
 };
+
+// Devuelve la ruta a la que lleva una notificación, o null si no apunta a nada.
+export async function notificationTarget(data: Record<string, string> = {}) {
+  if (data.conversation_id) return { pathname: '/conversation/[id]', params: { id: data.conversation_id } } as const;
+  if (data.deal_id && supabase) {
+    const { data: deal } = await supabase.from('deals').select('conversation_id').eq('id', data.deal_id).maybeSingle();
+    if (deal?.conversation_id) return { pathname: '/conversation/[id]', params: { id: String(deal.conversation_id) } } as const;
+  }
+  if (data.donation_id) return { pathname: '/comunidad/donaciones/[id]', params: { id: data.donation_id } } as const;
+  if (data.adoption_id) return { pathname: '/comunidad/adopciones/[id]', params: { id: data.adoption_id } } as const;
+  if (data.review_id) return '/(tabs)/profile' as const;
+  return null;
+}

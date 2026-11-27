@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -21,12 +22,27 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+// Recuerda que la persona eligió "Explorar como invitado" para no volver a la bienvenida al recargar.
+const GUEST_KEY = 'mano.guest';
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const cache = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [accessMode, setAccessMode] = useState<'none' | 'guest' | 'demo'>('none');
+  const [guestChecked, setGuestChecked] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(GUEST_KEY)
+      .then((value) => { if (value === '1') setAccessMode((mode) => (mode === 'none' ? 'guest' : mode)); })
+      .catch(() => {})
+      .finally(() => setGuestChecked(true));
+  }, []);
+
+  const continueAsGuest = useCallback(() => {
+    setAccessMode('guest');
+    void AsyncStorage.setItem(GUEST_KEY, '1').catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!supabase) return;
@@ -83,12 +99,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     cache.clear();
     setSession(null);
     setAccessMode('none');
+    void AsyncStorage.removeItem(GUEST_KEY).catch(() => {});
   }, [cache]);
 
   const value = useMemo<AuthContextValue>(() => ({
-    session, loading, isGuest: accessMode === 'guest', isAuthenticated: Boolean(session) || accessMode === 'demo', backendReady: isSupabaseConfigured,
-    signIn, signUp, recoverPassword, signOut, continueAsGuest: () => setAccessMode('guest'),
-  }), [accessMode, loading, recoverPassword, session, signIn, signOut, signUp]);
+    session, loading: loading || !guestChecked, isGuest: accessMode === 'guest', isAuthenticated: Boolean(session) || accessMode === 'demo', backendReady: isSupabaseConfigured,
+    signIn, signUp, recoverPassword, signOut, continueAsGuest,
+  }), [accessMode, continueAsGuest, guestChecked, loading, recoverPassword, session, signIn, signOut, signUp]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -1,4 +1,5 @@
 import { FavoriteButton } from '@/features/guardados/favorite-button';
+import { ReportListingModal } from '@/features/confianza/report';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -34,6 +35,7 @@ export default function ListingDetailScreen() {
   const [offerVisible, setOfferVisible] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [actionError, setActionError] = useState('');
+  const [reportVisible, setReportVisible] = useState(false);
   const ownListing = Boolean(listing && session?.user.id === listing.ownerId);
   const amount = useMemo(() => listing ? getListingAmount(listing.price, listing.budget) : undefined, [listing]);
 
@@ -91,6 +93,7 @@ export default function ListingDetailScreen() {
           <View className="mt-4 flex-row items-center"><Ionicons name="star" size={17} color={colors.rating} /><Text className="ml-1 font-medium text-sm text-ink">{!isSupabaseConfigured ? 'Demo' : listing.rating > 0 ? listing.rating.toFixed(1) : 'Sin reseñas'}</Text><Ionicons name="location-outline" size={17} color={colors.muted} style={{ marginLeft: 16 }} /><Text className="ml-1 flex-1 font-sans text-sm text-muted">{listing.city} · {listing.address}</Text></View>
           <View className="my-6 h-px bg-line" />
           <Text className="font-display text-xl text-navy">Descripción</Text><Text className="mt-3 font-sans text-[15px] leading-6 text-ink">{listing.description}</Text>
+          {!ownListing && isSupabaseConfigured && <Pressable onPress={() => protect(() => setReportVisible(true), `/listing/${listing.id}`)} className="mt-3 flex-row items-center self-start py-1"><Ionicons name="flag-outline" size={15} color={colors.muted} /><Text className="ml-1 font-sans text-xs text-muted">Reportar publicación</Text></Pressable>}
           <View className="mt-6 rounded-2xl bg-canvas p-4"><Text className="mb-3 font-display text-lg text-navy">Información</Text>{Boolean(listing.condition) && <Info icon="sparkles-outline" text={`Condición: ${listing.condition}`} />}{Boolean(listing.serviceArea) && <Info icon="map-outline" text={`Zona de atención: ${listing.serviceArea}`} />}{Boolean(listing.availability) && <Info icon="time-outline" text={`Disponibilidad: ${listing.availability}`} />}{listing.homeService && <Info icon="home-outline" text="Atención a domicilio" />}{listing.shippingAvailable && <Info icon="cube-outline" text="Envío disponible" />}</View>
           <Pressable onPress={() => router.push({ pathname: '/profile/[id]', params: { id: listing.ownerId } })} className="mt-5 rounded-2xl border border-line p-4"><Text className="mb-4 font-display text-xl text-navy">Publicado por</Text><View className="flex-row items-center"><Avatar uri={listing.ownerAvatar} name={listing.ownerName} size={58} /><View className="ml-3 flex-1"><View className="flex-row items-center"><Text className="font-display text-lg text-ink">{listing.ownerName}</Text></View><Text className="mt-1 font-sans text-xs text-muted">{listing.ownerProfession}</Text><Text className="mt-1 font-medium text-xs text-ink">★ {!isSupabaseConfigured ? 'Demo' : listing.rating > 0 ? listing.rating.toFixed(1) : 'Sin reseñas'}</Text></View><Ionicons name="chevron-forward" size={20} color={colors.muted} /></View></Pressable>
           <PublicReviews ownerId={listing.ownerId} listingId={listing.id}/>
@@ -109,6 +112,7 @@ export default function ListingDetailScreen() {
           </View>
         )}
       </View>
+      <ReportListingModal listingId={listing.id} visible={reportVisible} onClose={() => setReportVisible(false)} />
       <Modal visible={offerVisible} transparent animationType="slide" onRequestClose={() => setOfferVisible(false)}>
         <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setOfferVisible(false)}>
           <Pressable className="rounded-t-[32px] bg-white p-6 pb-10" onPress={(event) => event.stopPropagation()}>

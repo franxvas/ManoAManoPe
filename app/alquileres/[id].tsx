@@ -66,6 +66,7 @@ export default function DetalleAlquilerScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f4f4f5' },
+  container: { flex: 1, padding: 24, justifyContent: 'center' },
   topBar: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   backText: { fontSize: 15, fontWeight: '600', color: '#1e3a8a' },
