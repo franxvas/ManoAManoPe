@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +6,7 @@ import { PrimaryButton } from "@/components/primary-button";
 import { ScreenHeader } from "@/components/screen-header";
 import { useAuth } from "@/features/auth/auth-provider";
 import { supabase } from "@/lib/supabase";
+import { goBackOr } from "@/utils/navigation";
 
 export default function VerifyIdentityScreen() {
   const { session } = useAuth();
@@ -52,7 +52,7 @@ export default function VerifyIdentityScreen() {
               Tu perfil ahora muestra la insignia "Identidad verificada" y ya no
               tienes límite diario de publicaciones.
             </Text>
-            <PrimaryButton label="Volver" onPress={() => router.back()} />
+            <PrimaryButton label="Volver" onPress={() => goBackOr("/(tabs)/profile")} />
           </View>
         ) : (
           <>
