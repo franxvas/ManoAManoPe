@@ -170,7 +170,7 @@ export default function EditWork() {
               />
             </>
           ) : (
-            <View pointerEvents={busy ? "none" : "auto"}>
+            <View style={{ pointerEvents: busy ? "none" : "auto" }}>
               <FormField
                 label="Título"
                 value={title}

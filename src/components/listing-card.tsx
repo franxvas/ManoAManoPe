@@ -29,7 +29,7 @@ export function ListingCard({ listing, horizontal = false, compact = false, mapP
       accessibilityLabel={`Abrir ${listing.title}`}
     >
       <View className={`relative bg-slate-200 ${compact ? 'h-28' : 'h-36'}`}>
-        {image ? <Image source={{ uri: image }} className="h-full w-full" contentFit="cover" transition={200} /> : <View className="h-full w-full bg-slate-200" />}
+        {image ? <Image source={{ uri: image }} style={{ width: "100%", height: "100%" }} contentFit="cover" transition={200} /> : <View className="h-full w-full bg-slate-200" />}
         <View style={{ backgroundColor: palette.background }} className="absolute left-2 top-2 rounded-lg px-2 py-1">
           <Text style={{ color: palette.foreground }} className="font-medium text-[10px] uppercase tracking-wide">{listingLabels[listing.type]}</Text>
         </View>
